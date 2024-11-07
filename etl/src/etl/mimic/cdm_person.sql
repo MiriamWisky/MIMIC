@@ -36,6 +36,7 @@ FROM tmp_subject_ethnicity src
 -- -------------------------------------------------------------------
 -- cdm_person
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS cdm_person;
 
 --HINT DISTRIBUTE_ON_KEY(person_id)
 CREATE TABLE cdm_person
@@ -66,7 +67,7 @@ CREATE TABLE cdm_person
 )
 ;
 
-INSERT INTO cdm_person
+INSERT INTO 
 SELECT row_number() OVER (ORDER BY random())                 AS person_id,
        CASE
            WHEN p.gender = 'F' THEN 8532 -- FEMALE
@@ -137,3 +138,5 @@ FROM src_patients p
 -- -------------------------------------------------------------------
 
 DROP TABLE if EXISTS tmp_subject_ethnicity;
+
+SELECT * FROM omopcdm.cdm_person;

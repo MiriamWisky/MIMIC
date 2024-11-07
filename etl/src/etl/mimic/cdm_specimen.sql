@@ -1,4 +1,8 @@
+DROP TABLE IF EXISTS cdm_specimen;
+
 --HINT DISTRIBUTE_ON_KEY(person_id)
+
+
 CREATE TABLE cdm_specimen
 (
     specimen_id                 INTEGER     NOT NULL ,

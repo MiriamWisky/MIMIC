@@ -324,7 +324,7 @@ CREATE TABLE cdm_note_nlp
   note_id                     INTEGER                ,
   section_concept_id          INTEGER                ,
   snippet                     text               ,
-  OFFSET                      text               ,
+  "OFFSET"                      text               ,
   lexical_variant             text      NOT NULL ,
   note_nlp_concept_id         INTEGER                ,
   note_nlp_source_concept_id  INTEGER                ,
@@ -336,6 +336,7 @@ CREATE TABLE cdm_note_nlp
   term_modifiers              text
 )
 ;
+
 
 
 --HINT DISTRIBUTE_ON_KEY(person_id)

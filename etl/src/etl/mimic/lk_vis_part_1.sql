@@ -52,10 +52,12 @@ WHERE src.eventtype != 'discharge' -- these are not useful
 -- -------------------------------------------------------------------
 
 CREATE TABLE lk_services_duplicated AS
-SELECT trace_id,
+-- SELECT trace_id,
+SELECT src.trace_id::text AS trace_id,
        COUNT(*) AS row_count
 FROM src_services src
-GROUP BY src.trace_id
+-- GROUP BY src.trace_id
+GROUP BY src.trace_id::text
 HAVING COUNT(*) > 1
 ;
 
@@ -81,6 +83,6 @@ SELECT src.subject_id    AS   subject_id,
 FROM src_services src
          LEFT JOIN
      lk_services_duplicated sd
-     ON src.trace_id = sd.trace_id
+     ON src.trace_id = sd.trace_id::text
 WHERE sd.trace_id IS NULL -- remove duplicates with the exact same time of transferring
 ;

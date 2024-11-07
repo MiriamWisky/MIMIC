@@ -248,11 +248,13 @@ CREATE TABLE cdm_drug_era
 )
 ;
 
+DROP TABLE IF EXISTS cdm_drug_era;
+
 -- -------------------------------------------------------------------
 -- @summary: 30 days window is allowed
 -- -------------------------------------------------------------------
 INSERT INTO cdm_drug_era
-SELECT uuid_hash(uuid_nil())                                                          AS drug_era_id,
+SELECT row_number() OVER ()                                                          AS drug_era_id,
        person_id                                                             AS person_id,
        ingredient_concept_id                                                 AS drug_concept_id,
        MIN(drug_sub_exposure_start_date)                                     AS drug_era_start_date,

@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS cdm_cdm_source;
 CREATE TABLE cdm_cdm_source
 (
     cdm_source_name                 text        NOT NULL ,

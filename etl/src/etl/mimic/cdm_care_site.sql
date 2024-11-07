@@ -2,7 +2,8 @@ CREATE TABLE lk_trans_careunit_clean AS
 SELECT src.careunit      AS source_code,
        src.load_table_id AS load_table_id,
        0                 AS load_row_id,
-       MIN(src.trace_id) AS trace_id
+    --    MIN(src.trace_id) AS trace_id
+    MIN(src.trace_id::text) AS trace_id
 FROM src_transfers src
 WHERE src.careunit IS NOT NULL
 GROUP BY careunit,
@@ -14,7 +15,7 @@ GROUP BY careunit,
 -- -------------------------------------------------------------------
 -- cdm_care_site
 -- -------------------------------------------------------------------
-
+DROP TABLE IF EXISTS cdm_care_site;
 CREATE TABLE cdm_care_site
 (
     care_site_id                  INTEGER       NOT NULL ,
@@ -32,7 +33,7 @@ CREATE TABLE cdm_care_site
 ;
 
 INSERT INTO cdm_care_site
-SELECT uuid_hash(uuid_nil())          AS care_site_id,
+SELECT row_number() OVER ()          AS care_site_id,
        src.source_code       AS care_site_name,
        vc2.concept_id        AS place_of_service_concept_id,
        1                     AS location_id, -- hard-coded BIDMC

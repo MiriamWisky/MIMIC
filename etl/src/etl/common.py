@@ -30,9 +30,10 @@ VOCABULARY_TABLES = [
     'relationship',
     'concept_synonym',
     'concept_ancestor',
-    'drug_strength',
-    'concept_recommended',
-    'source_to_concept_map'
+    'drug_strength'
+    # ,
+    # 'concept_recommended',
+    # 'source_to_concept_map'
 ]
 
 CDM_TABLES = [
@@ -114,6 +115,7 @@ SITE_LIST = ['columbia',
 
 @contextlib.contextmanager
 def postgresql_cursor():
+    
     pgdbname = os.environ['MODEPGDB']
     with psycopg.connect(f'postgresql://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{pgdbname}') as conn:
         with conn.cursor() as c:
@@ -225,7 +227,7 @@ def view_tables(
             f"CREATE VIEW {target_name} AS \n"
             f"SELECT * FROM  {source_name};"
         )
-        execute_sql(names, qs)
+    execute_sql(names, qs)
 
 
 def pipe_table_transfer(

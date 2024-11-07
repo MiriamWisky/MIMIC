@@ -94,7 +94,7 @@ GROUP BY c.condition_occurrence_id,
 -- -------------------------------------------------------------------
 -- Load Table: Condition_era
 -- -------------------------------------------------------------------
-
+DROP TABLE IF EXISTS cdm_condition_era;
 --HINT DISTRIBUTE_ON_KEY(person_id)
 CREATE TABLE cdm_condition_era
 (
@@ -118,7 +118,7 @@ CREATE TABLE cdm_condition_era
 -- 30 days window is allowed.
 -- -------------------------------------------------------------------
 INSERT INTO cdm_condition_era
-SELECT uuid_hash(uuid_nil())                         AS condition_era_id,
+SELECT row_number() OVER ()                         AS condition_era_id,
        person_id                            AS person_id,
        condition_concept_id                 AS condition_concept_id,
        MIN(condition_start_date)            AS condition_era_start_date,

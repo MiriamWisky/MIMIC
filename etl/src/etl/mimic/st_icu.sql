@@ -8,13 +8,13 @@ SELECT hadm_id    AS hadm_id,
     CAST(0 AS INTEGER)                    AS cancelreason, -- MIMIC IV 2.0 change, the field is removed
     --
     'procedureevents'                   AS load_table_id,
-    uuid_hash(uuid_nil())   AS load_row_id,
+    row_number() OVER()   AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id','starttime'],
                ARRAY[subject_id::text,hadm_id::text, starttime::text]
            )          AS trace_id
 FROM
-    procedureevents_mimic
+    mimiciv_icu.procedureevents
 ;
 
 -- -------------------------------------------------------------------
@@ -33,12 +33,12 @@ SELECT itemid       AS itemid,
        -- highnormalvalue
        --
        'd_items'    AS load_table_id,
-       uuid_hash(uuid_nil()) AS load_row_id,
+       row_number() OVER() AS load_row_id,
        json_object(
                ARRAY['itemid','linksto'],
                ARRAY[itemid::text,linksto::text]
            )          AS trace_id
-FROM d_items_mimic
+FROM mimiciv_icu.d_items
 ;
 
 -- -------------------------------------------------------------------
@@ -54,13 +54,13 @@ SELECT subject_id AS subject_id,
        value AS VALUE,
     --
     'datetimeevents'                    AS load_table_id,
-    uuid_hash(uuid_nil())   AS load_row_id,
+    row_number() OVER()   AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id', 'stay_id', 'charttime'],
                ARRAY[subject_id::text,hadm_id::text, stay_id::text,charttime::text]
            )          AS trace_id
 FROM
-    datetimeevents_mimic
+    mimiciv_icu.datetimeevents
 ;
 
 
@@ -75,11 +75,11 @@ SELECT subject_id AS subject_id,
     valueuom    AS valueuom,
     --
     'chartevents'                       AS load_table_id,
-    uuid_hash(uuid_nil())   AS load_row_id,
+    row_number() OVER()   AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id', 'stay_id', 'charttime'],
                ARRAY[subject_id::text,hadm_id::text, stay_id::text,charttime::text]
            )          AS trace_id
 FROM
-    chartevents_mimic
+    mimiciv_icu.chartevents
 ;

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS cdm_fact_relationship;
+
 CREATE TABLE cdm_fact_relationship
 (
     domain_concept_id_1     INTEGER     NOT NULL ,

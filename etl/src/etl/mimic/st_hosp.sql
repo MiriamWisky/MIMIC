@@ -6,12 +6,12 @@ SELECT subject_id      AS subject_id,
        icd_version     AS icd_version,
        --
        'diagnoses_icd' AS load_table_id,
-       uuid_hash(uuid_nil())    AS load_row_id,
+       row_number() OVER()    AS load_row_id,
        json_object(
                ARRAY['hadm_id','seq_num'],
                ARRAY[hadm_id::text,seq_num::text]
            )          AS trace_id
-FROM diagnoses_icd_mimic
+FROM mimiciv_hosp.diagnoses_icd
 ;
 
 -- -------------------------------------------------------------------
@@ -30,12 +30,12 @@ SELECT subject_id   AS subject_id,
        curr_service AS curr_service,
        --
        'services'   AS load_table_id,
-       uuid_hash(uuid_nil()) AS load_row_id,
+       row_number() OVER() AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id','transfertime'],
                ARRAY[subject_id::text,hadm_id::text, transfertime::text]
            )          AS trace_id
-FROM services_mimic
+FROM mimiciv_hosp.services
 ;
 
 -- -------------------------------------------------------------------
@@ -55,13 +55,13 @@ SELECT labevent_id AS labevent_id,
     ref_range_upper                     AS ref_range_upper,
     --
     'labevents'                         AS load_table_id,
-    uuid_hash(uuid_nil())   AS load_row_id,
+    row_number() OVER()   AS load_row_id,
     json_object(
                ARRAY['labevent_id'],
                ARRAY[labevent_id::text]
            )          AS trace_id
 FROM
-    labevents_mimic
+    mimiciv_hosp.labevents
 ;
 
 -- -------------------------------------------------------------------
@@ -76,12 +76,12 @@ SELECT itemid               AS itemid,
        CAST(NULL AS text) AS loinc_code, -- MIMIC IV 2.0 change, the field is removed
        --
        'd_labitems'         AS load_table_id,
-       uuid_hash(uuid_nil())         AS load_row_id,
+       row_number() OVER()         AS load_row_id,
        json_object(
                ARRAY['itemid'],
                ARRAY[itemid::text]
            )          AS trace_id
-FROM d_labitems_mimic
+FROM mimiciv_hosp.d_labitems
 ;
 
 
@@ -100,12 +100,12 @@ SELECT subject_id       AS subject_id,
        icd_version      AS icd_version,
        --
        'procedures_icd' AS load_table_id,
-       uuid_hash(uuid_nil())     AS load_row_id,
+       row_number() OVER()     AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id','icd_code', 'icd_version'],
                ARRAY[subject_id::text,hadm_id::text, icd_code::text, icd_version::text]
            )          AS trace_id
-FROM procedures_icd_mimic
+FROM mimiciv_hosp.procedures_icd
 ;
 
 -- -------------------------------------------------------------------
@@ -120,12 +120,12 @@ SELECT hadm_id           AS hadm_id,
        short_description AS short_description,
        --
        'hcpcsevents'     AS load_table_id,
-       uuid_hash(uuid_nil())      AS load_row_id,
+       row_number() OVER()      AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id','hcpcs_cd', 'seq_num'],
                ARRAY[subject_id::text,hadm_id::text, hcpcs_cd::text, seq_num::text]
            )          AS trace_id
-FROM hcpcsevents_mimic
+FROM mimiciv_hosp.hcpcsevents
 ;
 
 
@@ -140,12 +140,12 @@ SELECT hadm_id      AS hadm_id,
        description  AS description,
        --
        'drgcodes'   AS load_table_id,
-       uuid_hash(uuid_nil()) AS load_row_id,
+       row_number() OVER() AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id','drg_code'],
                ARRAY[subject_id::text,hadm_id::text, COALESCE(drg_code, '')::text]
            )          AS trace_id
-FROM drgcodes_mimic
+FROM mimiciv_hosp.drgcodes
 ;
 
 -- -------------------------------------------------------------------
@@ -172,12 +172,12 @@ SELECT hadm_id          AS hadm_id,
        route            AS route,
        --
        'prescriptions'  AS load_table_id,
-       uuid_hash(uuid_nil())     AS load_row_id,
+       row_number() OVER()     AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id','pharmacy_id', 'starttime'],
                ARRAY[subject_id::text,hadm_id::text, pharmacy_id::text, starttime::text]
            )          AS trace_id
-FROM prescriptions_mimic
+FROM mimiciv_hosp.prescriptions
 ;
 
 
@@ -204,12 +204,12 @@ SELECT microevent_id        AS microevent_id,
        interpretation       AS interpretation,      -- bacteria's degree of resistance to the antibiotic
        --
        'microbiologyevents' AS load_table_id,
-       uuid_hash(uuid_nil())         AS load_row_id,
+       row_number() OVER()         AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id','microevent_id'],
                ARRAY[subject_id::text,hadm_id::text, microevent_id::text]
            )          AS trace_id
-FROM microbiologyevents_mimic
+FROM mimiciv_hosp.microbiologyevents
 ;
 
 -- -------------------------------------------------------------------
@@ -245,12 +245,16 @@ WITH d_micro AS (
         ab_name                     AS label, -- source_code for custom mapping
         'ANTIBIOTIC'                AS category, 
         --
-        json_object(
-               ARRAY['field_name','itemid'],
-               ARRAY['ab_itemid', ab_itemid::text]
-           )          AS trace_id
+        -- json_object(
+        --        ARRAY['field_name','itemid'],
+        --        ARRAY['ab_itemid', ab_itemid::text]
+        --    )          AS trace_id
+        jsonb_build_object(
+               'field_name', 'ab_itemid',
+               'itemid', ab_itemid::text
+           ) AS trace_id
     FROM
-        microbiologyevents_mimic
+        mimiciv_hosp.microbiologyevents
     WHERE
         ab_itemid IS NOT NULL
     UNION ALL
@@ -259,12 +263,16 @@ WITH d_micro AS (
         test_name                   AS label, -- source_code for custom mapping
         'MICROTEST'                 AS category, 
         --
-        json_object(
-               ARRAY['field_name','itemid'],
-               ARRAY['test_itemid', test_itemid::text]
-           )          AS trace_id
+        -- json_object(
+        --        ARRAY['field_name','itemid'],
+        --        ARRAY['test_itemid', test_itemid::text]
+        --    )          AS trace_id
+        jsonb_build_object(
+               'field_name', 'test_itemid',
+               'itemid', test_itemid::text
+           ) AS trace_id
     FROM
-        microbiologyevents_mimic
+        mimiciv_hosp.microbiologyevents
     WHERE
         test_itemid IS NOT NULL
     UNION ALL
@@ -273,12 +281,16 @@ WITH d_micro AS (
         org_name                    AS label, -- source_code for custom mapping
         'ORGANISM'                  AS category, 
         --
-        json_object(
-               ARRAY['field_name','itemid'],
-               ARRAY['org_itemid', org_itemid::text]
-           )          AS trace_id
+        -- json_object(
+        --        ARRAY['field_name','itemid'],
+        --        ARRAY['org_itemid', org_itemid::text]
+        --    )          AS trace_id
+        jsonb_build_object(
+               'field_name', 'org_itemid',
+               'itemid', org_itemid::text
+           ) AS trace_id
     FROM
-        microbiologyevents_mimic
+        mimiciv_hosp.microbiologyevents
     WHERE
         org_itemid IS NOT NULL
     UNION ALL
@@ -287,12 +299,16 @@ WITH d_micro AS (
         spec_type_desc              AS label, -- source_code for custom mapping
         'SPECIMEN'                  AS category, 
         --
-        json_object(
-               ARRAY['field_name','itemid'],
-               ARRAY['spec_itemid', spec_itemid::text]
-           )          AS trace_id
+        -- json_object(
+        --        ARRAY['field_name','itemid'],
+        --        ARRAY['spec_itemid', spec_itemid::text]
+        --    )          AS trace_id
+        jsonb_build_object(
+               'field_name', 'spec_itemid',
+               'itemid', spec_itemid::text
+           ) AS trace_id
     FROM
-        microbiologyevents_mimic
+        mimiciv_hosp.microbiologyevents
     WHERE
         spec_itemid IS NOT NULL
 )
@@ -301,7 +317,7 @@ SELECT itemid               AS itemid, -- numeric ID
        category             AS category,
        --
        'microbiologyevents' AS load_table_id,
-       uuid_hash(uuid_nil())         AS load_row_id,
+       row_number() OVER()         AS load_row_id,
        trace_id             AS trace_id
 FROM d_micro
 ;
@@ -320,10 +336,10 @@ SELECT pharmacy_id  AS pharmacy_id,
        -- route                               AS route,
        --
        'pharmacy'   AS load_table_id,
-       uuid_hash(uuid_nil()) AS load_row_id,
+       row_number() OVER() AS load_row_id,
        json_object(
                ARRAY['pharmacy_id'],
                ARRAY[pharmacy_id::text]
            )          AS trace_id
-FROM pharmacy_mimic
+FROM mimiciv_hosp.pharmacy
 ;

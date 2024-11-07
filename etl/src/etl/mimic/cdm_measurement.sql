@@ -1,3 +1,6 @@
+
+DROP TABLE IF EXISTS cdm_measurement;
+
 CREATE TABLE cdm_measurement
 (
     measurement_id                INTEGER     NOT NULL ,
@@ -207,7 +210,7 @@ WHERE src.target_domain_id = 'Measurement'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_measurement
-SELECT uuid_hash(uuid_nil())                        AS measurement_id,
+SELECT row_number() OVER ()                        AS measurement_id,
        per.person_id                       AS person_id,
        COALESCE(src.target_concept_id, 0)  AS measurement_concept_id,
        CAST(src.start_datetime AS DATE)    AS measurement_date,

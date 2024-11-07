@@ -17,7 +17,7 @@ from .common import (
     archive_and_rename_schema,
     create_or_replace_schema,
     execute_sql,
-    generate_flow_run_name,
+    # generate_flow_run_name,
     get_last_cdm_release_date,
     get_schemas_as_list,
     ingest_omop,
@@ -28,6 +28,60 @@ from .common import (
     subprocess_run,
     view_tables,
 )
+
+
+def load_mimic_source(stage_schema: str):
+    # Define the schemas and tables in MIMIC-IV
+    mimic_schemas_tables = {
+        'mimiciv_hosp': [
+            'admissions',
+            'patients',
+            'diagnoses_icd',
+            'd_icd_diagnoses',
+            'procedures_icd',
+            'd_icd_procedures',
+            'labevents',
+            'microbiologyevents',
+            'prescriptions',
+            'transfers',
+            'd_hcpcs',
+            'd_labitems',
+            'drgcodes',
+            'emar_detail',
+            'emar',
+            'hcpcsevents',
+            'omr',
+            'pharmacy',
+            'poe_detail',
+            'poe',
+            'provider',
+            'services',
+
+        ],
+        'mimiciv_icu': [
+            'icustays',
+            'chartevents',
+            'd_items',
+            'procedureevents',
+            'inputevents',
+            'outputevents',
+            'datetimeevents',
+            'caregiver',
+            'ingredientevents',
+
+
+        ],
+    }
+
+    # Loop over the schemas and create views for each table
+    for source_schema, tables in mimic_schemas_tables.items():
+        view_tables(
+            source_schema=source_schema,
+            source_tables=tables,
+            schema=stage_schema,
+        )
+
+
 
 def mimic_etl():
     print(f"Started etl pipeline for transforming the MIMIC dataset.")
@@ -40,14 +94,15 @@ def mimic_etl():
         stage_schema,
         "Staging area for MIMIC Transformation Process",
     )
-    load_and_execute_sql(
-        'cdm-ddl-5_3.sql',
-        schema=stage_schema
-    )
+    # load_and_execute_sql(
+    #     'mimic/ddl_cdm_5_3_1.sql',
+    #     schema=stage_schema
+    # )
 
-    load_mimic_source(
-        # This function should load mimic source tables
-    )
+    # load_mimic_source(
+    #     # This function should load mimic source tables
+    # )
+    load_mimic_source(stage_schema)
 
     view_tables(
         VOCABULARY_SCHEMA,

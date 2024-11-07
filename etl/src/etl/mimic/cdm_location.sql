@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS cdm_location;
+
 CREATE TABLE cdm_location
 (
     location_id           INTEGER     NOT NULL ,

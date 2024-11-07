@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS cdm_observation;
+
+
 CREATE TABLE cdm_observation
 (
     observation_id                INTEGER     NOT NULL ,
@@ -32,7 +35,7 @@ CREATE TABLE cdm_observation
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
-SELECT uuid_hash(uuid_nil())                        AS observation_id,
+SELECT row_number() OVER ()                        AS observation_id,
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id,
        CAST(src.start_datetime AS DATE)    AS observation_date,
@@ -112,7 +115,7 @@ WHERE src.target_domain_id = 'Observation'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
-SELECT uuid_hash(uuid_nil())                        AS observation_id,
+SELECT row_number() OVER ()                        AS observation_id,
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id,
        CAST(src.start_datetime AS DATE)    AS observation_date,
@@ -152,7 +155,7 @@ WHERE src.target_domain_id = 'Observation'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
-SELECT uuid_hash(uuid_nil())                        AS observation_id,
+SELECT row_number() OVER ()                        AS observation_id,
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id, -- to rename fields in *_mapped
        CAST(src.start_datetime AS DATE)    AS observation_date,
@@ -192,7 +195,7 @@ WHERE src.target_domain_id = 'Observation'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
-SELECT uuid_hash(uuid_nil())                        AS observation_id,
+SELECT row_number() OVER ()                        AS observation_id,
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id,
        CAST(src.start_datetime AS DATE)    AS observation_date,

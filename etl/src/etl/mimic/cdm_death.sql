@@ -16,7 +16,8 @@ SELECT DISTINCT src.subject_id,
         partition BY src.subject_id
         ORDER BY src.admittime ASC
     )                                   AS load_row_id,
-    nth_value(src.trace_id, 1) over(
+    -- nth_value(src.trace_id, 1) over(
+    nth_value(src.trace_id::text, 1) over(
         partition BY src.subject_id
         ORDER BY src.admittime ASC
     )                                   AS trace_id
@@ -27,7 +28,7 @@ WHERE src.deathtime IS NOT NULL
 -- -------------------------------------------------------------------
 -- cdm_death
 -- -------------------------------------------------------------------
-
+DROP TABLE IF EXISTS cdm_death;
 --HINT DISTRIBUTE_ON_KEY(person_id)
 CREATE TABLE cdm_death
 (

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS cdm_dose_era;
+
 CREATE TABLE cdm_dose_era
 (
     dose_era_id           INTEGER     NOT NULL ,
@@ -264,7 +266,7 @@ GROUP BY dt.drug_exposure_id,
 ;
 
 INSERT INTO cdm_dose_era
-SELECT uuid_hash(uuid_nil())                  AS dose_era_id,
+SELECT row_number() OVER ()                  AS dose_era_id,
        person_id                     AS person_id,
        drug_concept_id               AS drug_concept_id,
        unit_concept_id               AS unit_concept_id,

@@ -1,4 +1,5 @@
-
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE src_patients AS
 SELECT subject_id                        AS subject_id,
        anchor_year                       AS anchor_year,
@@ -7,12 +8,12 @@ SELECT subject_id                        AS subject_id,
        gender                            AS gender,
        --
        'patients'                        AS load_table_id,
-       uuid_hash(uuid_nil()) AS load_row_id,
+       row_number() OVER() AS load_row_id,
        json_object(
                ARRAY['subject_id'],
                ARRAY[subject_id::text]
            )          AS trace_id
-FROM patients_mimic
+FROM mimiciv_hosp.patients
 ;
 
 -- -------------------------------------------------------------------
@@ -36,13 +37,13 @@ SELECT hadm_id            AS hadm_id,   -- PK
        -- hospital_expire_flag
        --
     'admissions' AS load_table_id,
-    uuid_hash(uuid_nil()) AS load_row_id,
+    row_number() OVER() AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id'],
                ARRAY[subject_id::text,hadm_id::text]
            )          AS trace_id
 FROM
-    admissions_mimic
+    mimiciv_hosp.admissions
 ;
 
 -- -------------------------------------------------------------------
@@ -59,10 +60,10 @@ SELECT transfer_id                       AS transfer_id,
        eventtype                         AS eventtype,
        --
        'transfers'                       AS load_table_id,
-       uuid_hash(uuid_nil()) AS load_row_id,
+       row_number() OVER() AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id', 'transfer_id'],
                ARRAY[subject_id::text,hadm_id::text, transfer_id::text]
            )          AS trace_id
-FROM transfers_mimic
+FROM mimiciv_hosp.transfers
 ;

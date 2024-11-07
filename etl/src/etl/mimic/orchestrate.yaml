@@ -26,16 +26,16 @@ transformations:
       parallel: true
       sub_path: ""
 
-    vocab: &VOCAB
-      sql:
-        - combine_custom_vocab.sql
-        - insert_custom_vocab.sql
-      notebooks:
-      depends:
-        - *DDL
-        - *STAGE
-      parallel: false
-      sub_path: ""
+    # vocab: &VOCAB
+    #   sql:
+    #     - combine_custom_vocab.sql
+    #     - insert_custom_vocab.sql
+    #   notebooks:
+    #   depends:
+    #     - *DDL
+    #     - *STAGE
+    #   parallel: false
+    #   sub_path: ""
 
     etl: &ETL
       sql:
@@ -77,7 +77,7 @@ transformations:
       depends:
         - *DDL
         - *STAGE
-        - *VOCAB
+        # - *VOCAB
       parallel: false
       sub_path: ""
       
@@ -86,5 +86,5 @@ transformations:
     sequence:
       - *DDL
       - *STAGE
-      - *VOCAB
+      # - *VOCAB
       - *ETL
