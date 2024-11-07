@@ -1,2 +1,4 @@
 *.idea
 vocabulary/
+mimic-iv2/
+etl_logs.txt
