@@ -7,7 +7,7 @@ SELECT src.subject_id                   AS subject_id,
        src.unit_id                      AS unit_id,
        src.load_table_id                AS load_table_id,
        src.load_row_id                  AS load_row_id,
-       src.trace_id                     AS trace_id
+       src.trace_id::text                     AS trace_id
 FROM lk_meas_labevents_mapped src
 WHERE src.hadm_id IS NULL
 UNION ALL
@@ -43,21 +43,21 @@ SELECT src.subject_id                   AS subject_id,
        src.unit_id                      AS unit_id,
        src.load_table_id                AS load_table_id,
        src.load_row_id                  AS load_row_id,
-       src.trace_id                     AS trace_id
+       src.trace_id::text                     AS trace_id
 FROM lk_meas_ab_mapped src
 WHERE src.hadm_id IS NULL
-UNION ALL
+-- UNION ALL
 -- waveforms
-SELECT src.subject_id                   AS subject_id,
-       CAST(src.start_datetime AS DATE) AS date_id,
-       src.start_datetime               AS start_datetime,
-       --
-       src.unit_id                      AS unit_id,
-       src.load_table_id                AS load_table_id,
-       src.load_row_id                  AS load_row_id,
-       src.trace_id                     AS trace_id
-FROM lk_meas_waveform_mapped src
-WHERE src.hadm_id IS NULL
+-- SELECT src.subject_id                   AS subject_id,
+--        CAST(src.start_datetime AS DATE) AS date_id,
+--        src.start_datetime               AS start_datetime,
+--        --
+--        src.unit_id                      AS unit_id,
+--        src.load_table_id                AS load_table_id,
+--        src.load_row_id                  AS load_row_id,
+--        src.trace_id                     AS trace_id
+-- FROM lk_meas_waveform_mapped src
+-- WHERE src.hadm_id IS NULL
 ;
 
 -- -------------------------------------------------------------------
@@ -75,10 +75,18 @@ SELECT src.subject_id           AS subject_id,
        --
        'no_hadm'                AS unit_id,
        'lk_visit_no_hadm_all'   AS load_table_id,
-       0                        AS load_row_id,
-       json_object(
-               ARRAY['case_id','date_id'],
-               ARRAY[case_id::text,date_id::text]
+        0                        AS load_row_id,
+    --    json_build_object(
+    --     'case_id', src.case_id::text,
+    --     'date_id', src.date_id::text
+    -- ) AS trace_id                    
+    --    json_object(
+    --            ARRAY['case_id','date_id'],
+    --            ARRAY[case_id::text,src.date_id::text]
+    --        )          AS trace_id
+    json_object(
+               ARRAY['date_id'],
+               ARRAY[src.date_id::text]
            )          AS trace_id
 FROM lk_visit_no_hadm_all src
 GROUP BY src.subject_id,
@@ -93,34 +101,34 @@ GROUP BY src.subject_id,
 --      lk_meas_waveform_mapped
 -- -------------------------------------------------------------------
 
-CREATE TABLE lk_visit_detail_waveform_dist AS
-SELECT src.subject_id                        AS subject_id,
-       src.hadm_id                           AS hadm_id,
-       CAST(MIN(src.start_datetime) AS DATE) AS date_id,
-       MIN(src.start_datetime)               AS start_datetime,
-       MAX(src.start_datetime)               AS end_datetime,
-       'AMBULATORY OBSERVATION'              AS current_location, -- outpatient visit
-       src.reference_id                      AS reference_id,
-       --
-       'waveforms'                           AS unit_id,
-       'lk_meas_waveform_mapped'             AS load_table_id,
-       0                                     AS load_row_id,
-       json_object(
-               ARRAY['subject_id','hadm_id', 'reference_id'],
-               ARRAY[subject_id::text,hadm_id::text, reference_id::text]
-           )          AS trace_id
-FROM lk_meas_waveform_mapped src
-GROUP BY src.subject_id,
-         src.hadm_id,
-         src.reference_id
-;
+-- CREATE TABLE lk_visit_detail_waveform_dist AS
+-- SELECT src.subject_id                        AS subject_id,
+--        src.hadm_id                           AS hadm_id,
+--        CAST(MIN(src.start_datetime) AS DATE) AS date_id,
+--        MIN(src.start_datetime)               AS start_datetime,
+--        MAX(src.start_datetime)               AS end_datetime,
+--        'AMBULATORY OBSERVATION'              AS current_location, -- outpatient visit
+--        src.reference_id                      AS reference_id,
+--        --
+--        'waveforms'                           AS unit_id,
+--        'lk_meas_waveform_mapped'             AS load_table_id,
+--        0                                     AS load_row_id,
+--        json_object(
+--                ARRAY['subject_id','hadm_id', 'reference_id'],
+--                ARRAY[subject_id::text,hadm_id::text, reference_id::text]
+--            )          AS trace_id
+-- FROM lk_meas_waveform_mapped src
+-- GROUP BY src.subject_id,
+--          src.hadm_id,
+--          src.reference_id
+-- ;
 
 -- -------------------------------------------------------------------
 -- lk_visit_clean
 -- -------------------------------------------------------------------
 
 CREATE TABLE lk_visit_clean AS
-SELECT uuid_hash(uuid_nil())           AS visit_occurrence_id,
+SELECT row_number() OVER ()           AS visit_occurrence_id,
        src.subject_id         AS subject_id,
        src.hadm_id            AS hadm_id,
        CAST(NULL AS DATE)     AS date_id,
@@ -140,7 +148,7 @@ SELECT uuid_hash(uuid_nil())           AS visit_occurrence_id,
        src.trace_id           AS trace_id
 FROM lk_admissions_clean src -- adm
 UNION ALL
-SELECT uuid_hash(uuid_nil())           AS visit_occurrence_id,
+SELECT row_number() OVER ()           AS visit_occurrence_id,
        src.subject_id         AS subject_id,
        CAST(NULL AS INTEGER)  AS hadm_id,
        src.date_id            AS date_id,
@@ -169,7 +177,7 @@ FROM lk_visit_no_hadm_dist src -- adm
 -- -------------------------------------------------------------------
 
 CREATE TABLE lk_visit_detail_clean AS
-SELECT uuid_hash(uuid_nil())         AS visit_detail_id,
+SELECT row_number() OVER ()         AS visit_detail_id,
        src.subject_id       AS subject_id,
        src.hadm_id          AS hadm_id,
        src.date_id          AS date_id,
@@ -197,7 +205,7 @@ WHERE src.hadm_id IS NOT NULL -- some ER transfers are excluded because not all 
 -- ER admissions
 -- -------------------------------------------------------------------
 INSERT INTO lk_visit_detail_clean
-SELECT uuid_hash(uuid_nil())                     AS visit_detail_id,
+SELECT row_number() OVER ()                     AS visit_detail_id,
        src.subject_id                   AS subject_id,
        src.hadm_id                      AS hadm_id,
        CAST(src.start_datetime AS DATE) AS date_id,
@@ -224,7 +232,7 @@ WHERE src.is_er_admission
 -- services
 -- -------------------------------------------------------------------
 INSERT INTO lk_visit_detail_clean
-SELECT uuid_hash(uuid_nil())                     AS visit_detail_id,
+SELECT row_number() OVER ()                     AS visit_detail_id,
        src.subject_id                   AS subject_id,
        src.hadm_id                      AS hadm_id,
        CAST(src.start_datetime AS DATE)               AS date_id,
@@ -250,22 +258,22 @@ WHERE src.prev_service = src.lag_service -- ensure that the services sequence is
 -- Rule 4.
 -- waveforms
 -- -------------------------------------------------------------------
-INSERT INTO lk_visit_detail_clean
-SELECT uuid_hash(uuid_nil())         AS visit_detail_id,
-       src.subject_id       AS subject_id,
-       src.hadm_id          AS hadm_id,
-       src.date_id          AS date_id,
-       src.start_datetime   AS start_datetime,
-       src.end_datetime     AS end_datetime,     -- if null, populate with next start_datetime
-       src.reference_id     AS source_value,
-       src.current_location AS current_location, -- find prev and next for adm and disch location
-       --
-       src.unit_id          AS unit_id,
-       src.load_table_id    AS load_table_id,
-       src.load_row_id      AS load_row_id,
-       src.trace_id         AS trace_id
-FROM lk_visit_detail_waveform_dist src
-;
+-- INSERT INTO lk_visit_detail_clean
+-- SELECT uuid_hash(uuid_nil())         AS visit_detail_id,
+--        src.subject_id       AS subject_id,
+--        src.hadm_id          AS hadm_id,
+--        src.date_id          AS date_id,
+--        src.start_datetime   AS start_datetime,
+--        src.end_datetime     AS end_datetime,     -- if null, populate with next start_datetime
+--        src.reference_id     AS source_value,
+--        src.current_location AS current_location, -- find prev and next for adm and disch location
+--        --
+--        src.unit_id          AS unit_id,
+--        src.load_table_id    AS load_table_id,
+--        src.load_row_id      AS load_row_id,
+--        src.trace_id         AS trace_id
+-- FROM lk_visit_detail_waveform_dist src
+-- ;
 
 -- -------------------------------------------------------------------
 -- lk_visit_detail_prev_next

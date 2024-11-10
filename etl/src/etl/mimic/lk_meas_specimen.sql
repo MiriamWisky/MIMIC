@@ -9,14 +9,14 @@ SELECT trace_id                               AS trace_id_ab,   -- for antibioti
                src.spec_itemid,
                src.test_itemid,
                src.org_itemid
-           ORDER BY src.trace_id
+           ORDER BY src.trace_id::text
            )                                  AS trace_id_org,  -- for test-organism pairs
        nth_value(src.trace_id, 1) OVER ( PARTITION BY
            src.subject_id,
            src.hadm_id,
            COALESCE(src.charttime, src.chartdate),
            src.spec_itemid
-           ORDER BY src.trace_id
+           ORDER BY src.trace_id::text
            )                                  AS trace_id_spec, -- for specimen
        subject_id                             AS subject_id,    -- to pick additional hadm_id from admissions
        hadm_id                                AS hadm_id,
@@ -24,15 +24,16 @@ SELECT trace_id                               AS trace_id_ab,   -- for antibioti
 FROM src_microbiologyevents src -- mbe
 ;
 
+-- BEGIN;
+DROP TABLE IF EXISTS lk_micro_hadm_id;
 
-CREATE
-OR
-REPLACE
-TABLE lk_micro_hadm_id AS
+-- OR
+-- REPLACE
+CREATE TABLE lk_micro_hadm_id AS
 SELECT src.trace_id_ab AS event_trace_id,
        adm.hadm_id     AS hadm_id,
        ROW_NUMBER() OVER (
-           PARTITION BY src.trace_id_ab
+           PARTITION BY src.trace_id_ab::text
            ORDER BY adm.start_datetime
            )           AS row_num
 FROM lk_micro_cross_ref src
@@ -42,41 +43,42 @@ FROM lk_micro_cross_ref src
          AND src.start_datetime BETWEEN adm.start_datetime AND adm.end_datetime
 WHERE src.hadm_id IS NULL
 ;
+-- COMMIT;
 
 -- -------------------------------------------------------------------
 -- Part 2 of microbiology: test taken and organisms grown in the material of the test
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_meas_organism_clean;
 
-CREATE
-OR
-REPLACE
-TABLE lk_meas_organism_clean AS
+-- OR
+-- REPLACE
+CREATE TABLE lk_meas_organism_clean AS
 SELECT DISTINCT src.subject_id    AS subject_id,
                 src.hadm_id       AS hadm_id,
                 cr.start_datetime AS start_datetime,
                 src.spec_itemid   AS spec_itemid,   -- d_micro.itemid, type of specimen taken
                 src.test_itemid   AS test_itemid,   -- d_micro.itemid, test taken from the specimen
                 src.org_itemid    AS org_itemid,    -- d_micro.itemid, organism which has grown
-                cr.trace_id_spec  AS trace_id_spec, -- to link org and spec in fact_relationship
+                cr.trace_id_spec::text  AS trace_id_spec, -- to link org and spec in fact_relationship
                 --
                 'micro.organism'  AS unit_id,
                 src.load_table_id AS load_table_id,
                 0                 AS load_row_id,
-                cr.trace_id_org   AS trace_id       -- trace_id for test-organism
+                cr.trace_id_org::text   AS trace_id       -- trace_id for test-organism
 FROM src_microbiologyevents src -- mbe
          INNER JOIN
      lk_micro_cross_ref cr
-     ON src.trace_id = cr.trace_id_org
+     ON src.trace_id::text = cr.trace_id_org::text
 ;
 
 -- -------------------------------------------------------------------
 -- Part 1 of microbiology: specimen
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_specimen_clean;
 
-CREATE
-OR
-REPLACE
-TABLE lk_specimen_clean AS
+-- OR
+-- REPLACE
+CREATE TABLE lk_specimen_clean AS
 SELECT DISTINCT src.subject_id     AS subject_id,
                 src.hadm_id        AS hadm_id,
                 src.start_datetime AS start_datetime,
@@ -85,21 +87,21 @@ SELECT DISTINCT src.subject_id     AS subject_id,
                 'micro.specimen'   AS unit_id,
                 src.load_table_id  AS load_table_id,
                 0                  AS load_row_id,
-                cr.trace_id_spec   AS trace_id     -- trace_id for specimen
+                cr.trace_id_spec::text   AS trace_id     -- trace_id for specimen
 FROM lk_meas_organism_clean src -- mbe
          INNER JOIN
      lk_micro_cross_ref cr
-     ON src.trace_id = cr.trace_id_spec
+     ON src.trace_id::text = cr.trace_id_spec::text
 ;
 
 -- -------------------------------------------------------------------
 -- Part 3 of microbiology: antibiotics tested on organisms
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_meas_ab_clean;
 
-CREATE
-OR
-REPLACE
-TABLE lk_meas_ab_clean AS
+-- OR
+-- REPLACE
+CREATE TABLE lk_meas_ab_clean AS
 SELECT src.subject_id          AS subject_id,
        src.hadm_id             AS hadm_id,
        cr.start_datetime       AS start_datetime,
@@ -116,7 +118,7 @@ SELECT src.subject_id          AS subject_id,
 FROM src_microbiologyevents src
          INNER JOIN
      lk_micro_cross_ref cr
-     ON src.trace_id = cr.trace_id_ab
+     ON src.trace_id::text = cr.trace_id_ab::text
 WHERE src.ab_itemid IS NOT NULL
 ;
 
@@ -125,11 +127,11 @@ WHERE src.ab_itemid IS NOT NULL
 -- add resistance source codes to all microbiology source codes
 -- source_label for organism: test name plus specimen name
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_d_micro_clean;
 
-CREATE
-OR
-REPLACE
-TABLE lk_d_micro_clean AS
+-- OR
+-- REPLACE
+CREATE TABLE lk_d_micro_clean AS
 SELECT dm.itemid                                    AS itemid,
        CAST(dm.itemid AS text)                    AS source_code,
        dm.label                                     AS source_label, -- for organism_mapped: test name plus specimen name
@@ -159,11 +161,11 @@ WHERE src.interpretation IS NOT NULL
 --      (gcpt) brand new vocab -> mimiciv_micro_resistance -- loaded
 --        src_microbiologyevents.interpretation -> source_code
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_d_micro_concept;
 
-CREATE
-OR
-REPLACE
-TABLE lk_d_micro_concept AS
+-- OR
+-- REPLACE
+CREATE TABLE lk_d_micro_concept AS
 SELECT dm.itemid               AS itemid,
        dm.source_code          AS source_code,  -- itemid
        dm.source_label         AS source_label, -- symbolic information in case more mapping is required
@@ -201,12 +203,12 @@ FROM lk_d_micro_clean dm
 -- -------------------------------------------------------------------
 -- lk_specimen_mapped
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_specimen_mapped;
 
-CREATE
-OR
-REPLACE
-TABLE lk_specimen_mapped AS
-SELECT uuid_hash(uuid_nil())                              AS specimen_id,
+-- OR
+-- REPLACE
+CREATE TABLE lk_specimen_mapped AS
+SELECT row_number() OVER ()                              AS specimen_id,
        src.subject_id                            AS subject_id,
        COALESCE(src.hadm_id, hadm.hadm_id)       AS hadm_id,
        CAST(src.start_datetime AS DATE)          AS date_id,
@@ -229,19 +231,19 @@ FROM lk_specimen_clean src
      ON src.spec_itemid = mc.itemid
          LEFT JOIN
      lk_micro_hadm_id hadm
-     ON hadm.event_trace_id = src.trace_id
+     ON hadm.event_trace_id::text = src.trace_id::text
          AND hadm.row_num = 1
 ;
 
 -- -------------------------------------------------------------------
 -- lk_meas_organism_mapped
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_meas_organism_mapped;
 
-CREATE
-OR
-REPLACE
-TABLE lk_meas_organism_mapped AS
-SELECT uuid_hash(uuid_nil())                                 AS measurement_id,
+-- OR
+-- REPLACE
+CREATE TABLE lk_meas_organism_mapped AS
+SELECT row_number() OVER ()                                 AS measurement_id,
        src.subject_id                               AS subject_id,
        COALESCE(src.hadm_id, hadm.hadm_id)          AS hadm_id,
        CAST(src.start_datetime AS DATE)             AS date_id,
@@ -276,7 +278,7 @@ FROM lk_meas_organism_clean src
      ON src.org_itemid = oc.itemid
          LEFT JOIN
      lk_micro_hadm_id hadm
-     ON hadm.event_trace_id = src.trace_id
+     ON hadm.event_trace_id::text = src.trace_id::text
          AND hadm.row_num = 1
 ;
 
@@ -286,12 +288,12 @@ FROM lk_meas_organism_clean src
 --      (gcpt) brand new vocab -> mimiciv_micro_resistance
 --          mbe.interpretation -> source_code -> 4 rows for resistance degrees.
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS lk_meas_ab_mapped;
 
-CREATE
-OR
-REPLACE
-TABLE lk_meas_ab_mapped AS
-SELECT uuid_hash(uuid_nil())                                 AS measurement_id,
+-- OR
+-- REPLACE
+CREATE TABLE lk_meas_ab_mapped AS
+SELECT row_number() OVER ()                                 AS measurement_id,
        src.subject_id                               AS subject_id,
        COALESCE(src.hadm_id, hadm.hadm_id)          AS hadm_id,
        CAST(src.start_datetime AS DATE)             AS date_id,
@@ -327,6 +329,6 @@ FROM lk_meas_ab_clean src
      ON src.dilution_comparison = opc.source_code
          LEFT JOIN
      lk_micro_hadm_id hadm
-     ON hadm.event_trace_id = src.trace_id
+     ON hadm.event_trace_id::text = src.trace_id::text
          AND hadm.row_num = 1
 ;

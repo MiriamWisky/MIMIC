@@ -67,7 +67,7 @@ CREATE TABLE cdm_person
 )
 ;
 
-INSERT INTO 
+INSERT INTO cdm_person
 SELECT row_number() OVER (ORDER BY random())                 AS person_id,
        CASE
            WHEN p.gender = 'F' THEN 8532 -- FEMALE
@@ -139,4 +139,9 @@ FROM src_patients p
 
 DROP TABLE if EXISTS tmp_subject_ethnicity;
 
-SELECT * FROM omopcdm.cdm_person;
+SELECT COUNT(*) AS total_persons
+FROM cdm_person;
+
+SELECT *
+FROM cdm_person
+LIMIT 10;

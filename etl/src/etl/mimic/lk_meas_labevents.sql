@@ -16,20 +16,28 @@ FROM src_d_labitems dlab
 -- -------------------------------------------------------------------
 
 CREATE TABLE lk_meas_labevents_clean AS
-SELECT uuid_hash(uuid_nil())   AS measurement_id,
+SELECT row_number() OVER ()   AS measurement_id,
        src.subject_id AS subject_id,
        src.charttime  AS start_datetime, -- measurement_datetime,
        src.hadm_id    AS hadm_id,
        src.itemid     AS itemid,
        src.value AS VALUE, -- value_source_value
-    CASE
-        WHEN subtext(src.value,1, 1) IN ('<', '>')
-                 AND subtext(src.value,2, 1) = '='
-            THEN subtext(src.value,1, 2)
-        WHEN subtext(src.value,1, 1) IN ('=', '<', '>')
-            THEN subtext(src.value,1, 1)
+       CASE
+        WHEN SUBSTRING(src.value FROM 1 FOR 1) IN ('<', '>')
+             AND SUBSTRING(src.value FROM 2 FOR 1) = '='
+            THEN SUBSTRING(src.value FROM 1 FOR 2)
+        WHEN SUBSTRING(src.value FROM 1 FOR 1) IN ('=', '<', '>')
+            THEN SUBSTRING(src.value FROM 1 FOR 1)
     END AS value_operator,
-    REGEXP_EXTRACT(src.value, r'([-]?[\d]+[.]?[\d]*)')    AS value_number, -- assume "-0.34 etc"
+    SUBSTRING(src.value FROM '([-]?[\d]+[.]?[\d]*)') AS value_number, -- assume "-0.34 etc"
+    -- CASE
+    --     WHEN subtext(src.value,1, 1) IN ('<', '>')
+    --              AND subtext(src.value,2, 1) = '='
+    --         THEN subtext(src.value,1, 2)
+    --     WHEN subtext(src.value,1, 1) IN ('=', '<', '>')
+    --         THEN subtext(src.value,1, 1)
+    -- END AS value_operator,
+    -- REGEXP_EXTRACT(src.value, r'([-]?[\d]+[.]?[\d]*)')    AS value_number, -- assume "-0.34 etc"
     CASE WHEN TRIM(src.valueuom) <> '' THEN src.valueuom END    AS valueuom, -- unit_source_value,
     src.ref_range_lower                     AS ref_range_lower,
     src.ref_range_upper                     AS ref_range_upper,
@@ -93,7 +101,7 @@ CREATE TABLE lk_meas_labevents_hadm_id AS
 SELECT src.trace_id AS event_trace_id,
        adm.hadm_id  AS hadm_id,
        row_number()    over (
-        partition BY src.trace_id
+        partition BY src.trace_id::text
         ORDER BY adm.start_datetime
     )                                   AS row_num
 FROM lk_meas_labevents_clean src
@@ -148,6 +156,6 @@ FROM lk_meas_labevents_clean src
      ON uc.source_code = src.valueuom
          LEFT JOIN
      lk_meas_labevents_hadm_id hadm
-     ON hadm.event_trace_id = src.trace_id
+     ON hadm.event_trace_id::text = src.trace_id::text
          AND hadm.row_num = 1
 ;

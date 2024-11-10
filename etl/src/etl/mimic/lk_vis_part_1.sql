@@ -83,6 +83,6 @@ SELECT src.subject_id    AS   subject_id,
 FROM src_services src
          LEFT JOIN
      lk_services_duplicated sd
-     ON src.trace_id = sd.trace_id::text
+     ON src.trace_id::text = sd.trace_id::text
 WHERE sd.trace_id IS NULL -- remove duplicates with the exact same time of transferring
 ;
