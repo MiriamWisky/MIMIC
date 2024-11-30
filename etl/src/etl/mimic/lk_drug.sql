@@ -22,7 +22,10 @@ SELECT
     CAST(src.ndc AS text)                                                    AS ndc_source_code,
     'NDC'                                                                      AS ndc_source_vocabulary,
     src.form_val_disp                                                          AS form_val_disp,
-    CAST(regexp_extract(src.form_val_disp, r'([-]?[\d]+[.]?[\d]*)') AS NUMERIC) AS quantity,
+    -- CAST(regexp_extract(src.form_val_disp, r'([-]?[\d]+[.]?[\d]*)') AS NUMERIC) AS quantity,
+    CAST(
+        substring(src.form_val_disp FROM '([-]?[\d]+[.]?[\d]*)') AS NUMERIC
+    ) AS quantity,
     -- COALESCE(
     --     -- src.drug, src.drug_name_poe, src.drug_name_generic,'')
     --     src.drug, '')
@@ -32,7 +35,7 @@ SELECT
                                  'Syringe (Neonatal)', 'Syringe (Chemo)', 'Soln', 'Soln.',
                                  'Sodium Chloride 0.9%  Flush') THEN  pharm.medication ELSE src.drug END), '') ||
          ' ' ||
-         COALESCE(src.prod_strength, ''))                                      AS gcpt_source_code,       -- medication/drug + prod_strength
+         COALESCE(src.prod_strength, '')                                      AS gcpt_source_code,       -- medication/drug + prod_strength
     'mimiciv_drug_ndc'                                                         AS gcpt_source_vocabulary, -- source_code = label
     src.pharmacy_id                                                            AS pharmacy_id,
     -- 

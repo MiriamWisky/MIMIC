@@ -209,38 +209,38 @@ WHERE src.target_domain_id = 'Measurement'
 -- wf demo poc: 1,500 rows from 1,500 rows in mapped
 -- -------------------------------------------------------------------
 
-INSERT INTO cdm_measurement
-SELECT row_number() OVER ()                        AS measurement_id,
-       per.person_id                       AS person_id,
-       COALESCE(src.target_concept_id, 0)  AS measurement_concept_id,
-       CAST(src.start_datetime AS DATE)    AS measurement_date,
-       src.start_datetime                  AS measurement_datetime,
-       CAST(NULL AS text)                AS measurement_time,            -- deprecated, to be removed in later versions
-       32817                               AS measurement_type_concept_id, -- OMOP4976890 EHR
-       CAST(NULL AS INTEGER)               AS operator_concept_id,
-       src.value_as_number                 AS value_as_number,
-       CAST(NULL AS INTEGER)               AS value_as_concept_id,         -- to add values
-       src.unit_concept_id                 AS unit_concept_id,
-       CAST(NULL AS NUMERIC)               AS range_low,
-       CAST(NULL AS NUMERIC)               AS range_high,
-       CAST(NULL AS INTEGER)               AS provider_id,
-       vd.visit_occurrence_id              AS visit_occurrence_id,
-       vd.visit_detail_id                  AS visit_detail_id,
-       concat(src.source_code)             AS measurement_source_value,    -- source value is changed
-       src.source_concept_id               AS measurement_source_concept_id,
-       src.unit_source_value               AS unit_source_value,
-       CAST(src.value_as_number AS text) AS value_source_value,          -- ?
-       --
-       concat('measurement.', src.unit_id) AS unit_id,
-       src.load_table_id                   AS load_table_id,
-       src.load_row_id                     AS load_row_id,
-       src.trace_id                        AS trace_id
-FROM lk_meas_waveform_mapped src
-         INNER JOIN
-     cdm_person per
-     ON CAST(src.subject_id AS text) = per.person_source_value
-         INNER JOIN
-     cdm_visit_detail vd
-     ON src.reference_id = vd.visit_detail_source_value
-WHERE src.target_domain_id = 'Measurement'
-;
+-- INSERT INTO cdm_measurement
+-- SELECT row_number() OVER ()                        AS measurement_id,
+--        per.person_id                       AS person_id,
+--        COALESCE(src.target_concept_id, 0)  AS measurement_concept_id,
+--        CAST(src.start_datetime AS DATE)    AS measurement_date,
+--        src.start_datetime                  AS measurement_datetime,
+--        CAST(NULL AS text)                AS measurement_time,            -- deprecated, to be removed in later versions
+--        32817                               AS measurement_type_concept_id, -- OMOP4976890 EHR
+--        CAST(NULL AS INTEGER)               AS operator_concept_id,
+--        src.value_as_number                 AS value_as_number,
+--        CAST(NULL AS INTEGER)               AS value_as_concept_id,         -- to add values
+--        src.unit_concept_id                 AS unit_concept_id,
+--        CAST(NULL AS NUMERIC)               AS range_low,
+--        CAST(NULL AS NUMERIC)               AS range_high,
+--        CAST(NULL AS INTEGER)               AS provider_id,
+--        vd.visit_occurrence_id              AS visit_occurrence_id,
+--        vd.visit_detail_id                  AS visit_detail_id,
+--        concat(src.source_code)             AS measurement_source_value,    -- source value is changed
+--        src.source_concept_id               AS measurement_source_concept_id,
+--        src.unit_source_value               AS unit_source_value,
+--        CAST(src.value_as_number AS text) AS value_source_value,          -- ?
+--        --
+--        concat('measurement.', src.unit_id) AS unit_id,
+--        src.load_table_id                   AS load_table_id,
+--        src.load_row_id                     AS load_row_id,
+--        src.trace_id                        AS trace_id
+-- FROM lk_meas_waveform_mapped src
+--          INNER JOIN
+--      cdm_person per
+--      ON CAST(src.subject_id AS text) = per.person_source_value
+--          INNER JOIN
+--      cdm_visit_detail vd
+--      ON src.reference_id = vd.visit_detail_source_value
+-- WHERE src.target_domain_id = 'Measurement'
+-- ;

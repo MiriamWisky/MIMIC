@@ -29,10 +29,25 @@ services:
       - postgres
     networks:
       - postgres
-    restart: unless-stopped
+    # restart: unless-stopped
+    # restart: on-failure
     env_file:           # Add this line
       - etl/.env
     # entrypoint: ["/bin/sh", "-c", "scripts/wait-for-it.sh postgres_container:5432 -- your_etl_command_here"]
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: miriamwisky11@gmail.com  
+      PGADMIN_DEFAULT_PASSWORD: admin         
+    ports:
+      - "8081:80"  
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+
 
 networks:
   postgres:

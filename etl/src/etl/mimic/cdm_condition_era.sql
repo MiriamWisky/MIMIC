@@ -68,7 +68,8 @@ CREATE TABLE tmp_enddates_condition
 AS
 SELECT person_id                AS person_id,
        condition_concept_id     AS condition_concept_id,
-       date_sub(event_date, 30) AS end_date -- unpad the end date
+    --    date_sub(event_date, 30) AS end_date -- unpad the end date
+    event_date - interval '30 days' AS end_date -- unpad the end date
 FROM tmp_dates_rows_condition e
 WHERE (2 * e.start_ordinal) - e.overall_ord = 0
 ;

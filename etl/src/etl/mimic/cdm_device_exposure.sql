@@ -36,9 +36,12 @@ SELECT row_number() OVER ()                     AS device_exposure_id,
        src.end_datetime                 AS device_exposure_end_datetime,
        src.type_concept_id              AS device_type_concept_id,
        CAST(NULL AS text)             AS unique_device_id,
-       CAST(
+       CAST((
                CASE WHEN round(src.quantity) = src.quantity THEN src.quantity END)
            AS INTEGER)                  AS quantity,
+        --    CAST(
+        --        CASE WHEN round(src.quantity) = src.quantity THEN src.quantity END)
+        --    AS INTEGER)                  AS quantity,
        CAST(NULL AS INTEGER)            AS provider_id,
        vis.visit_occurrence_id          AS visit_occurrence_id,
        CAST(NULL AS INTEGER)            AS visit_detail_id,
@@ -71,9 +74,12 @@ SELECT row_number() OVER ()                     AS device_exposure_id,
        src.start_datetime               AS device_exposure_end_datetime,
        src.type_concept_id              AS device_type_concept_id,
        CAST(NULL AS text)             AS unique_device_id,
-       CAST(
+       CAST((
                CASE WHEN round(src.value_as_number) = src.value_as_number THEN src.value_as_number END)
            AS INTEGER)                  AS quantity,
+        --    CAST(
+        --        CASE WHEN round(src.value_as_number) = src.value_as_number THEN src.value_as_number END)
+        --    AS INTEGER)                  AS quantity,
        CAST(NULL AS INTEGER)            AS provider_id,
        vis.visit_occurrence_id          AS visit_occurrence_id,
        CAST(NULL AS INTEGER)            AS visit_detail_id,

@@ -20,7 +20,9 @@ FROM tmp_subject_ethnicity src
          LEFT JOIN
      -- gcpt_ethnicity_to_concept -> mimiciv_per_ethnicity
          voc_concept vc
-     ON UPPER(vc.concept_code) = UPPER(src.ethnicity_first) -- do the custom mapping
+    --  ON UPPER(vc.concept_code) = UPPER(src.ethnicity_first) -- do the custom mapping
+    --  ON UPPER(vc.concept_name) = UPPER(src.ethnicity_first) -- check why!!!
+        ON UPPER(vc.concept_code) = UPPER(TRIM(REPLACE(src.ethnicity_first, ' OR ', '/'))) 
          AND vc.domain_id IN ('Race', 'Ethnicity')
          LEFT JOIN
      voc_concept_relationship cr1
@@ -101,12 +103,25 @@ SELECT row_number() OVER (ORDER BY random())                 AS person_id,
                THEN eth.ethnicity_first
            ELSE NULL
            END                      AS race_source_value,
-       COALESCE(
-               CASE
-                   WHEN map_eth.target_vocabulary_id <> 'Ethnicity'
-                       THEN map_eth.source_concept_id
-                   ELSE NULL
-                   END, 0)          AS race_source_concept_id,
+           COALESCE(
+        CASE
+            -- אם מדובר במזהה חדש (מעל 2,000,000,000) ואינו שייך ל-"Ethnicity"
+            WHEN map_eth.source_concept_id > 2000000000 AND map_eth.target_vocabulary_id <> 'Ethnicity'
+                THEN map_eth.source_concept_id
+            -- אם מדובר במיפוי רגיל שאינו אתניות
+            WHEN map_eth.target_vocabulary_id <> 'Ethnicity'
+                THEN map_eth.source_concept_id
+            -- אם אף אחד מהתנאים לא מתקיים, החזר NULL
+            ELSE NULL
+        END, 0
+        ) AS race_source_concept_id,
+
+    --    COALESCE(
+    --            CASE
+    --                WHEN map_eth.target_vocabulary_id <> 'Ethnicity'
+    --                    THEN map_eth.source_concept_id
+    --                ELSE NULL
+    --                END, 0)          AS race_source_concept_id,
        CASE
            WHEN map_eth.target_vocabulary_id = 'Ethnicity'
                THEN eth.ethnicity_first
@@ -137,11 +152,5 @@ FROM src_patients p
 -- cleanup
 -- -------------------------------------------------------------------
 
-DROP TABLE if EXISTS tmp_subject_ethnicity;
+-- DROP TABLE if EXISTS tmp_subject_ethnicity;
 
-SELECT COUNT(*) AS total_persons
-FROM cdm_person;
-
-SELECT *
-FROM cdm_person
-LIMIT 10;

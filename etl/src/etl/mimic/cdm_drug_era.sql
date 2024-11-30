@@ -142,8 +142,9 @@ SELECT row_number                                   AS row_number,
        drug_sub_exposure_start_date                 AS drug_sub_exposure_start_date,
        drug_sub_exposure_end_date                   AS drug_sub_exposure_end_date,
        drug_exposure_count                          AS drug_exposure_count,
-       datediff(drug_sub_exposure_end_date,
-                 drug_sub_exposure_start_date) AS days_exposed
+    --    datediff(drug_sub_exposure_end_date,
+    --              drug_sub_exposure_start_date) AS days_exposed
+    (drug_sub_exposure_end_date - drug_sub_exposure_start_date) AS days_exposed
 FROM tmp_sub_drug
 ;
 
@@ -201,7 +202,8 @@ CREATE TABLE tmp_enddates_drug
 AS
 SELECT person_id                             AS person_id,
        ingredient_concept_id                 AS ingredient_concept_id,
-       date_sub(event_date, 30) AS end_date -- unpad the end date
+    --    date_sub(event_date, 30) AS end_date -- unpad the end date
+        event_date - interval '30 days' AS end_date
 FROM tmp_enddates_rows_drug e
 WHERE (2 * e.start_ordinal) - e.overall_ord = 0
 ;
@@ -230,7 +232,7 @@ GROUP BY ft.person_id,
 -- -------------------------------------------------------------------
 -- Load Table: Drug_era
 -- -------------------------------------------------------------------
-
+DROP TABLE if EXISTS cdm_drug_era;
 --HINT DISTRIBUTE_ON_KEY(person_id)
 CREATE TABLE cdm_drug_era
 (
@@ -248,7 +250,6 @@ CREATE TABLE cdm_drug_era
 )
 ;
 
-DROP TABLE IF EXISTS cdm_drug_era;
 
 -- -------------------------------------------------------------------
 -- @summary: 30 days window is allowed
@@ -260,9 +261,11 @@ SELECT row_number() OVER ()                                                     
        MIN(drug_sub_exposure_start_date)                                     AS drug_era_start_date,
        drug_era_end_date                                                     AS drug_era_end_date,
        SUM(drug_exposure_count)                                              AS drug_exposure_count,
-       datediff(drug_era_end_date,
-                 MIN(drug_sub_exposure_start_date)) - SUM(days_exposed) AS gap_days,
+    --    datediff(drug_era_end_date,
+    --              MIN(drug_sub_exposure_start_date)) - SUM(days_exposed) AS gap_days,
 -- --
+    (EXTRACT(EPOCH FROM (drug_era_end_date - MIN(drug_sub_exposure_start_date))) / 86400)::INTEGER - SUM(days_exposed) AS gap_days,
+
        'drug_era.drug_exposure'                                              AS unit_id,
        CAST(NULL AS text)                                                  AS load_table_id,
        CAST(NULL AS INTEGER)                                                 AS load_row_id

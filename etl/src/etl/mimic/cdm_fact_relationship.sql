@@ -56,7 +56,7 @@ SELECT 21                 AS domain_concept_id_1,     -- Measurement
 FROM lk_meas_organism_mapped org
          INNER JOIN
      lk_meas_ab_mapped ab
-     ON ab.trace_id_org = org.trace_id
+     ON ab.trace_id_org::text = org.trace_id
 ;
 
 INSERT INTO cdm_fact_relationship
@@ -69,5 +69,5 @@ SELECT 21                 AS domain_concept_id_1,     -- Measurement
 FROM lk_meas_organism_mapped org
          INNER JOIN
      lk_meas_ab_mapped ab
-     ON ab.trace_id_org = org.trace_id
+     ON ab.trace_id_org::text = org.trace_id
 ;

@@ -117,17 +117,28 @@ def mimic_etl():
 
     schemas = get_schemas_as_list()
 
-    if PRODUCTION_SCHEMA in schemas:
-        archive_suffix = get_last_cdm_release_date(PRODUCTION_SCHEMA)
-        archive_and_rename_schema(TEMP_SCHEMA, PRODUCTION_SCHEMA, archive_suffix)
-    else:
-        rename_schema(TEMP_SCHEMA, PRODUCTION_SCHEMA)
+    # if PRODUCTION_SCHEMA in schemas:
+    #     archive_suffix = get_last_cdm_release_date(PRODUCTION_SCHEMA)
+    #     archive_and_rename_schema(TEMP_SCHEMA, PRODUCTION_SCHEMA, archive_suffix)
+    # else:
+    #     rename_schema(TEMP_SCHEMA, PRODUCTION_SCHEMA)
+    
+    
+    
+    # if PRODUCTION_SCHEMA in schemas:
+    #     archive_suffix = get_last_cdm_release_date(PRODUCTION_SCHEMA)
+    #     archive_and_rename_schema(stage_schema, PRODUCTION_SCHEMA, archive_suffix)
+    # else:
+    #     rename_schema(stage_schema, PRODUCTION_SCHEMA)
 
-    subprocess_run(
-        ['Rscript', os.path.join(ETL_DIR, 'ares.R'), ARES_DATA_ROOT, mode, PRODUCTION_SCHEMA],
-        cwd='/ares',
-        check=True,
-    )
+
+
+
+    # subprocess_run(
+    #     ['Rscript', os.path.join(ETL_DIR, 'ares.R'), ARES_DATA_ROOT, mode, PRODUCTION_SCHEMA],
+    #     cwd='/ares',
+    #     check=True,
+    # )
 
     t1 = datetime.datetime.now()
     minutes = round((t1 - t0).total_seconds() / 60)

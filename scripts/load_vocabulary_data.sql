@@ -310,7 +310,7 @@ SET search_path TO vocabulary;
 
 -- -- טעינת הנתונים באמצעות COPY
 -- -- חשוב לטעון את טבלת relationship לפני concept_relationship
-
+TRUNCATE TABLE concept;
 -- טעינת טבלת concept
 COPY concept (
   concept_id,
@@ -328,12 +328,39 @@ FROM '/data/vocabulary/CONCEPT.csv'
 WITH (
   FORMAT CSV,
   DELIMITER E'\t',
+  QUOTE E'\x01',
+  ESCAPE E'\x01',
+  HEADER,
+  NULL '',
+  FORCE_NULL (standard_concept, invalid_reason)
+);
+
+COPY concept (
+  concept_id,
+  concept_name,
+  domain_id,
+  vocabulary_id,
+  concept_class_id,
+  standard_concept,
+  concept_code,
+  valid_start_date,
+  valid_end_date,
+  invalid_reason
+)
+FROM '/data/vocabulary/2b_concept.csv'
+WITH (
+  FORMAT CSV,
+  DELIMITER E',',
+  QUOTE '"',
+  ESCAPE '"',
   HEADER,
   NULL '',
   FORCE_NULL (standard_concept, invalid_reason)
 );
 
 SELECT COUNT(*) FROM concept;
+
+TRUNCATE TABLE vocabulary;
 
 -- טעינת טבלת vocabulary
 COPY vocabulary (
@@ -352,6 +379,23 @@ WITH (
   FORCE_NULL (vocabulary_version)
 );
 
+COPY vocabulary (
+  vocabulary_id,
+  vocabulary_name,
+  vocabulary_reference,
+  vocabulary_version,
+  vocabulary_concept_id
+)
+FROM '/data/vocabulary/2b_vocabulary.csv'
+WITH (
+  FORMAT CSV,
+  DELIMITER E',',
+  HEADER,
+  NULL '',
+  FORCE_NULL (vocabulary_version)
+);
+
+
 -- טעינת טבלת domain
 TRUNCATE TABLE domain;
 COPY domain (
@@ -367,6 +411,8 @@ WITH (
   NULL ''
 );
 
+TRUNCATE TABLE concept_class;
+
 -- טעינת טבלת concept_class
 COPY concept_class (
   concept_class_id,
@@ -380,6 +426,8 @@ WITH (
   HEADER,
   NULL ''
 );
+
+TRUNCATE TABLE relationship;
 
 -- טעינת טבלת relationship לפני concept_relationship
 COPY relationship (
@@ -397,6 +445,8 @@ WITH (
   HEADER,
   NULL ''
 );
+
+TRUNCATE TABLE concept_relationship;
 
 -- טעינת טבלת concept_relationship לאחר טעינת relationship
 COPY concept_relationship (
@@ -416,6 +466,25 @@ WITH (
   FORCE_NULL (invalid_reason)
 );
 
+COPY concept_relationship (
+  concept_id_1,
+  concept_id_2,
+  relationship_id,
+  valid_start_date,
+  valid_end_date,
+  invalid_reason
+)
+FROM '/data/vocabulary/2b_concept_relationship.csv'
+WITH (
+  FORMAT CSV,
+  DELIMITER E',',
+  HEADER,
+  NULL '',
+  FORCE_NULL (invalid_reason)
+);
+
+TRUNCATE TABLE concept_synonym;
+
 -- טעינת טבלת concept_synonym
 COPY concept_synonym (
   concept_id,
@@ -426,10 +495,13 @@ FROM '/data/vocabulary/CONCEPT_SYNONYM.csv'
 WITH (
   FORMAT CSV,
   DELIMITER E'\t',
+  QUOTE E'\x01',
+  ESCAPE E'\x01',
   HEADER,
   NULL ''
 );
 
+TRUNCATE TABLE concept_ancestor;
 
 -- טעינת טבלת concept_ancestor
 COPY concept_ancestor (
@@ -446,6 +518,7 @@ WITH (
   NULL ''
 );
 
+TRUNCATE TABLE drug_strength;
 
 -- טעינת טבלת drug_strength
 COPY drug_strength (

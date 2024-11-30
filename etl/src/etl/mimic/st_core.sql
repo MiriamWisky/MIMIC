@@ -1,5 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 CREATE TABLE src_patients AS
 SELECT subject_id                        AS subject_id,
        anchor_year                       AS anchor_year,

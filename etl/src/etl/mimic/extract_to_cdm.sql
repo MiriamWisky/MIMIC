@@ -1,4 +1,8 @@
-CREATE TABLE concept AS
+CREATE SCHEMA IF NOT EXISTS OMOP;
+
+
+DROP TABLE IF EXISTS OMOP.concept;
+CREATE TABLE OMOP.concept AS
 SELECT concept_id,
        concept_name,
        domain_id,
@@ -11,7 +15,9 @@ SELECT concept_id,
        invalid_reason
 FROM voc_concept;
 
-CREATE TABLE vocabulary AS
+
+DROP TABLE IF EXISTS OMOP.vocabulary;
+CREATE TABLE OMOP.vocabulary AS
 SELECT vocabulary_id,
        vocabulary_name,
        vocabulary_reference,
@@ -19,19 +25,26 @@ SELECT vocabulary_id,
        vocabulary_concept_id
 FROM voc_vocabulary;
 
-CREATE TABLE DOMAIN AS
+
+DROP TABLE IF EXISTS OMOP.DOMAIN;
+
+CREATE TABLE OMOP.DOMAIN AS
 SELECT domain_id,
        domain_name,
        domain_concept_id
 FROM voc_domain;
 
-CREATE TABLE concept_class AS
+DROP TABLE IF EXISTS OMOP.concept_class;
+
+CREATE TABLE OMOP.concept_class AS
 SELECT concept_class_id,
        concept_class_name,
        concept_class_concept_id
 FROM voc_concept_class;
 
-CREATE TABLE concept_relationship AS
+DROP TABLE IF EXISTS OMOP.concept_relationship;
+
+CREATE TABLE OMOP.concept_relationship AS
 SELECT concept_id_1,
        concept_id_2,
        relationship_id,
@@ -40,7 +53,9 @@ SELECT concept_id_1,
        invalid_reason
 FROM voc_concept_relationship;
 
-CREATE TABLE relationship AS
+DROP TABLE IF EXISTS OMOP.relationship;
+
+CREATE TABLE OMOP.relationship AS
 SELECT relationship_id,
        relationship_name,
        is_hierarchical,
@@ -49,20 +64,28 @@ SELECT relationship_id,
        relationship_concept_id
 FROM voc_relationship;
 
-CREATE TABLE concept_synonym AS
+DROP TABLE IF EXISTS OMOP.concept_synonym;
+
+CREATE TABLE OMOP.concept_synonym AS
 SELECT concept_id,
        concept_synonym_name,
        language_concept_id
 FROM voc_concept_synonym;
 
-CREATE TABLE concept_ancestor AS
+
+DROP TABLE IF EXISTS OMOP.concept_ancestor;
+
+CREATE TABLE OMOP.concept_ancestor AS
 SELECT ancestor_concept_id,
        descendant_concept_id,
        min_levels_of_separation,
        max_levels_of_separation
 FROM voc_concept_ancestor;
 
-CREATE TABLE source_to_concept_map AS
+
+DROP TABLE IF EXISTS OMOP.source_to_concept_map;
+
+CREATE TABLE OMOP.source_to_concept_map AS
 SELECT source_code,
        source_concept_id,
        source_vocabulary_id,
@@ -74,7 +97,10 @@ SELECT source_code,
        invalid_reason
 FROM voc_source_to_concept_map;
 
-CREATE TABLE drug_strength AS
+
+DROP TABLE IF EXISTS OMOP.drug_strength;
+
+CREATE TABLE OMOP.drug_strength AS
 SELECT drug_concept_id,
        ingredient_concept_id,
        amount_value,
@@ -89,10 +115,11 @@ SELECT drug_concept_id,
        invalid_reason
 FROM voc_drug_strength;
 
+DROP TABLE IF EXISTS OMOP.cohort_definition;
 
 -- Copy CDM tables
 
-CREATE TABLE cohort_definition AS
+CREATE TABLE OMOP.cohort_definition AS
 SELECT cohort_definition_id,
        cohort_definition_name,
        cohort_definition_description,
@@ -102,7 +129,10 @@ SELECT cohort_definition_id,
        cohort_initiation_date
 FROM cdm_cohort_definition;
 
-CREATE TABLE attribute_definition AS
+
+DROP TABLE IF EXISTS OMOP.attribute_definition;
+
+CREATE TABLE OMOP.attribute_definition AS
 SELECT attribute_definition_id,
        attribute_name,
        attribute_description,
@@ -110,7 +140,10 @@ SELECT attribute_definition_id,
        attribute_syntax
 FROM cdm_attribute_definition;
 
-CREATE TABLE cdm_source AS
+
+DROP TABLE IF EXISTS OMOP.cdm_source;
+
+CREATE TABLE OMOP.cdm_source AS
 SELECT cdm_source_name,
        cdm_source_abbreviation,
        cdm_holder,
@@ -123,7 +156,10 @@ SELECT cdm_source_name,
        vocabulary_version
 FROM cdm_cdm_source;
 
-CREATE TABLE metadata AS
+
+DROP TABLE IF EXISTS OMOP.metadata;
+
+CREATE TABLE OMOP.metadata AS
 SELECT metadata_concept_id,
        metadata_type_concept_id,
        name,
@@ -133,7 +169,10 @@ SELECT metadata_concept_id,
        metadata_datetime
 FROM cdm_metadata;
 
-CREATE TABLE person AS
+
+DROP TABLE IF EXISTS OMOP.person;
+
+CREATE TABLE OMOP.person AS
 SELECT person_id,
        gender_concept_id,
        year_of_birth,
@@ -154,7 +193,12 @@ SELECT person_id,
        ethnicity_source_concept_id
 FROM cdm_person;
 
-CREATE TABLE observation_period AS
+
+
+
+DROP TABLE IF EXISTS OMOP.observation_period;
+
+CREATE TABLE OMOP.observation_period AS
 SELECT observation_period_id,
        person_id,
        observation_period_start_date,
@@ -162,7 +206,10 @@ SELECT observation_period_id,
        period_type_concept_id
 FROM cdm_observation_period;
 
-CREATE TABLE specimen AS
+
+DROP TABLE IF EXISTS OMOP.specimen;
+
+CREATE TABLE OMOP.specimen AS
 SELECT specimen_id,
        person_id,
        specimen_concept_id,
@@ -180,7 +227,10 @@ SELECT specimen_id,
        disease_status_source_value
 FROM cdm_specimen;
 
-CREATE TABLE death AS
+
+DROP TABLE IF EXISTS OMOP.death;
+
+CREATE TABLE OMOP.death AS
 SELECT person_id,
        death_date,
        death_datetime,
@@ -190,7 +240,10 @@ SELECT person_id,
        cause_source_concept_id
 FROM cdm_death;
 
-CREATE TABLE visit_occurrence AS
+
+DROP TABLE IF EXISTS OMOP.visit_occurrence;
+
+CREATE TABLE OMOP.visit_occurrence AS
 SELECT visit_occurrence_id,
        person_id,
        visit_concept_id,
@@ -210,7 +263,10 @@ SELECT visit_occurrence_id,
        preceding_visit_occurrence_id
 FROM cdm_visit_occurrence;
 
-CREATE TABLE visit_detail AS
+
+DROP TABLE IF EXISTS OMOP.visit_detail;
+
+CREATE TABLE OMOP.visit_detail AS
 SELECT visit_detail_id,
        person_id,
        visit_detail_concept_id,
@@ -232,7 +288,10 @@ SELECT visit_detail_id,
        visit_occurrence_id
 FROM cdm_visit_detail;
 
-CREATE TABLE procedure_occurrence AS
+
+DROP TABLE IF EXISTS OMOP.procedure_occurrence;
+
+CREATE TABLE OMOP.procedure_occurrence AS
 SELECT procedure_occurrence_id,
        person_id,
        procedure_concept_id,
@@ -249,7 +308,10 @@ SELECT procedure_occurrence_id,
        modifier_source_value
 FROM cdm_procedure_occurrence;
 
-CREATE TABLE drug_exposure AS
+
+DROP TABLE IF EXISTS OMOP.drug_exposure;
+
+CREATE TABLE OMOP.drug_exposure AS
 SELECT drug_exposure_id,
        person_id,
        drug_concept_id,
@@ -275,7 +337,9 @@ SELECT drug_exposure_id,
        dose_unit_source_value
 FROM cdm_drug_exposure;
 
-CREATE TABLE device_exposure AS
+DROP TABLE IF EXISTS OMOP.device_exposure;
+
+CREATE TABLE OMOP.device_exposure AS
 SELECT device_exposure_id,
        person_id,
        device_concept_id,
@@ -293,7 +357,10 @@ SELECT device_exposure_id,
        device_source_concept_id
 FROM cdm_device_exposure;
 
-CREATE TABLE condition_occurrence AS
+
+DROP TABLE IF EXISTS OMOP.condition_occurrence;
+
+CREATE TABLE OMOP.condition_occurrence AS
 SELECT condition_occurrence_id,
        person_id,
        condition_concept_id,
@@ -312,7 +379,10 @@ SELECT condition_occurrence_id,
        condition_status_concept_id
 FROM cdm_condition_occurrence;
 
-CREATE TABLE measurement AS
+
+DROP TABLE IF EXISTS OMOP.measurement;
+
+CREATE TABLE OMOP.measurement AS
 SELECT measurement_id,
        person_id,
        measurement_concept_id,
@@ -335,7 +405,10 @@ SELECT measurement_id,
        value_source_value
 FROM cdm_measurement;
 
-CREATE TABLE note AS
+
+DROP TABLE IF EXISTS OMOP.note;
+
+CREATE TABLE OMOP.note AS
 SELECT note_id,
        person_id,
        note_date,
@@ -352,12 +425,14 @@ SELECT note_id,
        note_source_value
 FROM cdm_note;
 
-CREATE TABLE note_nlp AS
+DROP TABLE IF EXISTS OMOP.note_nlp;
+
+CREATE TABLE OMOP.note_nlp AS
 SELECT note_nlp_id,
        note_id,
        section_concept_id,
        snippet,
-       offset,
+       "OFFSET",
        lexical_variant,
        note_nlp_concept_id,
        note_nlp_source_concept_id,
@@ -369,7 +444,10 @@ SELECT note_nlp_id,
        term_modifiers
 FROM cdm_note_nlp;
 
-CREATE TABLE observation AS
+
+DROP TABLE IF EXISTS OMOP.observation;
+
+CREATE TABLE OMOP.observation AS
 SELECT observation_id,
        person_id,
        observation_concept_id,
@@ -390,7 +468,10 @@ SELECT observation_id,
        qualifier_source_value
 FROM cdm_observation;
 
-CREATE TABLE fact_relationship AS
+
+DROP TABLE IF EXISTS OMOP.fact_relationship;
+
+CREATE TABLE OMOP.fact_relationship AS
 SELECT domain_concept_id_1,
        fact_id_1,
        domain_concept_id_2,
@@ -398,7 +479,10 @@ SELECT domain_concept_id_1,
        relationship_concept_id
 FROM cdm_fact_relationship;
 
-CREATE TABLE location AS
+
+DROP TABLE IF EXISTS OMOP.location;
+
+CREATE TABLE OMOP.location AS
 SELECT location_id,
        address_1,
        address_2,
@@ -409,7 +493,10 @@ SELECT location_id,
        location_source_value
 FROM cdm_location;
 
-CREATE TABLE care_site AS
+
+DROP TABLE IF EXISTS OMOP.care_site;
+
+CREATE TABLE OMOP.care_site AS
 SELECT care_site_id,
        care_site_name,
        place_of_service_concept_id,
@@ -418,7 +505,11 @@ SELECT care_site_id,
        place_of_service_source_value
 FROM cdm_care_site;
 
-CREATE TABLE provider AS
+
+DROP VIEW IF EXISTS "provider";
+DROP TABLE IF EXISTS OMOP.provider;
+
+CREATE TABLE OMOP.provider AS
 SELECT provider_id,
        provider_name,
        npi,
@@ -434,7 +525,10 @@ SELECT provider_id,
        gender_source_concept_id
 FROM cdm_provider;
 
-CREATE TABLE payer_plan_period AS
+
+DROP TABLE IF EXISTS OMOP.payer_plan_period;
+
+CREATE TABLE OMOP.payer_plan_period AS
 SELECT payer_plan_period_id,
        person_id,
        payer_plan_period_start_date,
@@ -454,7 +548,10 @@ SELECT payer_plan_period_id,
        stop_reason_source_concept_id
 FROM cdm_payer_plan_period;
 
-CREATE TABLE cost AS
+
+DROP TABLE IF EXISTS OMOP.cost;
+
+CREATE TABLE OMOP.cost AS
 SELECT cost_id,
        cost_event_id,
        cost_domain_id,
@@ -479,14 +576,20 @@ SELECT cost_id,
        drg_source_value
 FROM cdm_cost;
 
-CREATE TABLE cohort AS
+
+DROP TABLE IF EXISTS OMOP.cohort;
+
+CREATE TABLE OMOP.cohort AS
 SELECT cohort_definition_id,
        subject_id,
        cohort_start_date,
        cohort_end_date
 FROM cdm_cohort;
 
-CREATE TABLE cohort_attribute AS
+
+DROP TABLE IF EXISTS OMOP.cohort_attribute;
+
+CREATE TABLE OMOP.cohort_attribute AS
 SELECT cohort_definition_id,
        subject_id,
        cohort_start_date,
@@ -496,7 +599,10 @@ SELECT cohort_definition_id,
        value_as_concept_id
 FROM cdm_cohort_attribute;
 
-CREATE TABLE drug_era AS
+
+DROP TABLE IF EXISTS OMOP.drug_era;
+
+CREATE TABLE OMOP.drug_era AS
 SELECT drug_era_id,
        person_id,
        drug_concept_id,
@@ -506,7 +612,10 @@ SELECT drug_era_id,
        gap_days
 FROM cdm_drug_era;
 
-CREATE TABLE dose_era AS
+
+DROP TABLE IF EXISTS OMOP.dose_era;
+
+CREATE TABLE OMOP.dose_era AS
 SELECT dose_era_id,
        person_id,
        drug_concept_id,
@@ -516,7 +625,10 @@ SELECT dose_era_id,
        dose_era_end_date
 FROM cdm_dose_era;
 
-CREATE TABLE condition_era AS
+
+DROP TABLE IF EXISTS OMOP.condition_era;
+
+CREATE TABLE OMOP.condition_era AS
 SELECT condition_era_id,
        person_id,
        condition_concept_id,

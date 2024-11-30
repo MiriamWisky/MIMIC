@@ -176,14 +176,22 @@ SELECT dwd.drug_exposure_id                                         AS drug_expo
        dwd.dose_value                                               AS dose_value,
        dwd.drug_exposure_start_date                                 AS drug_exposure_start_date,
        dwd.days_supply                                              AS days_supply,
-       COALESCE(drug_exposure_end_date,
+    --    COALESCE(drug_exposure_end_date,
+    --        -- If drug_exposure_end_date != NULL,
+    --        -- return drug_exposure_end_date, otherwise go to next case
+    --             NULLIF(drug_exposure_start_date + INTERVAL '1 day' * (1 * days_supply * (COALESCE(refills, 0) + 1))),
+    --                    drug_exposure_start_date)
+    --        --If days_supply != NULL or 0, return drug_exposure_start_date + days_supply,
+    --        -- otherwise go to next case
+    --             drug_exposure_start_date + INTERVAL '1 day' AS drug_exposure_end_date
+        COALESCE(drug_exposure_end_date,
            -- If drug_exposure_end_date != NULL,
            -- return drug_exposure_end_date, otherwise go to next case
-                NULLIF(drug_exposure_start_date + INTERVAL '1 day' * (1 * days_supply * (COALESCE(refills, 0) + 1))),
-                       drug_exposure_start_date)
+                NULLIF(drug_exposure_start_date + INTERVAL '1 day' * (1 * days_supply * (COALESCE(refills, 0) + 1)),
+                       drug_exposure_start_date),
            --If days_supply != NULL or 0, return drug_exposure_start_date + days_supply,
            -- otherwise go to next case
-                drug_exposure_start_date + INTERVAL '1 day' AS drug_exposure_end_date
+                drug_exposure_start_date + INTERVAL '1 day') AS drug_exposure_end_date
 -- Add 1 day to the drug_exposure_start_date since
 -- there is no end_date or INTERVAL for the days_supply
 FROM tmp_drugwithdose dwd
@@ -236,7 +244,8 @@ SELECT person_id                             AS person_id,
        drug_concept_id                       AS drug_concept_id,
        unit_concept_id                       AS unit_concept_id,
        dose_value                            AS dose_value,
-       date_sub(event_date, 30) AS end_date -- unpad the end date
+    --    date_sub(event_date, 30) AS end_date -- unpad the end date
+    event_date - INTERVAL '30 days' AS end_date -- unpad the end date
 FROM tmp_ctedoseenddates_e
 WHERE (2 * start_ordinal) - overall_ord = 0
 ;
