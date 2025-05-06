@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS cdm_visit_detail;
+
+
 CREATE TABLE cdm_visit_detail
 (
     visit_detail_id                    INTEGER     NOT NULL ,

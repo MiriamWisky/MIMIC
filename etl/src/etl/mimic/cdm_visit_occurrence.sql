@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS cdm_visit_occurrence;
+
+
 --HINT DISTRIBUTE_ON_KEY(person_id)
 CREATE TABLE cdm_visit_occurrence
 (

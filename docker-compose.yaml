@@ -1,0 +1,17 @@
+services:
+  etl:
+    container_name: etl_container
+    build:
+      context: ./etl
+      dockerfile: Dockerfile
+    networks:
+      - postgres
+    restart: unless-stopped
+    env_file:        
+      - etl/.env
+
+networks:
+  postgres:
+    driver: bridge
+
+

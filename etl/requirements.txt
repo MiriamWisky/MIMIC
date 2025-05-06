@@ -65,7 +65,14 @@ portalocker==2.7.0
 prefect==2.12.1
 psycopg==3.1.10
 psycopg-binary==3.1.10
-pyarrow==13.0.0
+
+
+# pyarrow==13.0.0
+pyarrow>=14.0.1
+
+
+
+
 pyasn1==0.5.0
 pyasn1-modules==0.3.0
 pycparser==2.21

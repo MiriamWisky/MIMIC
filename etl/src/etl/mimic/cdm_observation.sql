@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+DROP TABLE IF EXISTS cdm_observation;
+
+
+>>>>>>> postgres
 CREATE TABLE cdm_observation
 (
     observation_id                INTEGER     NOT NULL ,
@@ -7,7 +13,11 @@ CREATE TABLE cdm_observation
     observation_datetime          TIMESTAMP           ,
     observation_type_concept_id   INTEGER     NOT NULL ,
     value_as_number               NUMERIC        ,
+<<<<<<< HEAD
     value_as_text               text         ,
+=======
+    value_as_string               text         ,
+>>>>>>> postgres
     value_as_concept_id           INTEGER          ,
     qualifier_concept_id          INTEGER          ,
     unit_concept_id               INTEGER          ,
@@ -32,15 +42,24 @@ CREATE TABLE cdm_observation
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
+<<<<<<< HEAD
 SELECT uuid_hash(uuid_nil())                        AS observation_id,
+=======
+SELECT NEXTVAL('global_id_seq')                        AS observation_id,
+>>>>>>> postgres
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id,
        CAST(src.start_datetime AS DATE)    AS observation_date,
        src.start_datetime                  AS observation_datetime,
        src.type_concept_id                 AS observation_type_concept_id,
        CAST(NULL AS NUMERIC)               AS value_as_number,
+<<<<<<< HEAD
        src.value_as_text                 AS value_as_text,
        CASE WHEN src.value_as_text IS NOT NULL THEN COALESCE(src.value_as_concept_id, 0) END  AS value_as_concept_id,
+=======
+       src.value_as_string                 AS value_as_string,
+       CASE WHEN src.value_as_string IS NOT NULL THEN COALESCE(src.value_as_concept_id, 0) END  AS value_as_concept_id,
+>>>>>>> postgres
        CAST(NULL AS INTEGER)               AS qualifier_concept_id,
        CAST(NULL AS INTEGER)               AS unit_concept_id,
        CAST(NULL AS INTEGER)               AS provider_id,
@@ -79,7 +98,11 @@ SELECT src.measurement_id                  AS observation_id, -- id is generated
        src.start_datetime                  AS observation_datetime,
        src.type_concept_id                 AS observation_type_concept_id,
        src.value_as_number                 AS value_as_number,
+<<<<<<< HEAD
        src.value_source_value              AS value_as_text,
+=======
+       src.value_source_value              AS value_as_string,
+>>>>>>> postgres
        CASE WHEN src.value_source_value IS NOT NULL THEN COALESCE(src.value_as_concept_id, 0) END AS value_as_concept_id,
        CAST(NULL AS INTEGER)               AS qualifier_concept_id,
        src.unit_concept_id                 AS unit_concept_id,
@@ -112,14 +135,22 @@ WHERE src.target_domain_id = 'Observation'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
+<<<<<<< HEAD
 SELECT uuid_hash(uuid_nil())                        AS observation_id,
+=======
+SELECT NEXTVAL('global_id_seq')                        AS observation_id,
+>>>>>>> postgres
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id,
        CAST(src.start_datetime AS DATE)    AS observation_date,
        src.start_datetime                  AS observation_datetime,
        src.type_concept_id                 AS observation_type_concept_id,
        CAST(NULL AS NUMERIC)               AS value_as_number,
+<<<<<<< HEAD
        CAST(NULL AS text)                AS value_as_text,
+=======
+       CAST(NULL AS text)                AS value_as_string,
+>>>>>>> postgres
        CAST(NULL AS INTEGER)               AS value_as_concept_id,
        CAST(NULL AS INTEGER)               AS qualifier_concept_id,
        CAST(NULL AS INTEGER)               AS unit_concept_id,
@@ -152,14 +183,22 @@ WHERE src.target_domain_id = 'Observation'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
+<<<<<<< HEAD
 SELECT uuid_hash(uuid_nil())                        AS observation_id,
+=======
+SELECT NEXTVAL('global_id_seq')                        AS observation_id,
+>>>>>>> postgres
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id, -- to rename fields in *_mapped
        CAST(src.start_datetime AS DATE)    AS observation_date,
        src.start_datetime                  AS observation_datetime,
        src.type_concept_id                 AS observation_type_concept_id,
        CAST(NULL AS NUMERIC)               AS value_as_number,
+<<<<<<< HEAD
        CAST(NULL AS text)                AS value_as_text,
+=======
+       CAST(NULL AS text)                AS value_as_string,
+>>>>>>> postgres
        CAST(NULL AS INTEGER)               AS value_as_concept_id,
        CAST(NULL AS INTEGER)               AS qualifier_concept_id,
        CAST(NULL AS INTEGER)               AS unit_concept_id,
@@ -192,14 +231,14 @@ WHERE src.target_domain_id = 'Observation'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_observation
-SELECT uuid_hash(uuid_nil())                        AS observation_id,
+SELECT NEXTVAL('global_id_seq')                        AS observation_id,
        per.person_id                       AS person_id,
        src.target_concept_id               AS observation_concept_id,
        CAST(src.start_datetime AS DATE)    AS observation_date,
        src.start_datetime                  AS observation_datetime,
        src.type_concept_id                 AS observation_type_concept_id,
        CAST(NULL AS NUMERIC)               AS value_as_number,
-       CAST(NULL AS text)                AS value_as_text,
+       CAST(NULL AS text)                AS value_as_string,
        CAST(NULL AS INTEGER)               AS value_as_concept_id,
        CAST(NULL AS INTEGER)               AS qualifier_concept_id,
        CAST(NULL AS INTEGER)               AS unit_concept_id,

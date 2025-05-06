@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS cdm_procedure_occurrence;
+
+
 CREATE TABLE cdm_procedure_occurrence
 (
     procedure_occurrence_id     INTEGER     NOT NULL ,
@@ -28,7 +31,7 @@ CREATE TABLE cdm_procedure_occurrence
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_procedure_occurrence
-SELECT uuid_hash(uuid_nil())                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')                      AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,
@@ -62,9 +65,8 @@ WHERE src.target_domain_id = 'Procedure'
 -- Rule 5
 -- lk_observation_mapped, possible DRG codes
 -- -------------------------------------------------------------------
-
 INSERT INTO cdm_procedure_occurrence
-SELECT uuid_hash(uuid_nil())                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')  AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,
@@ -100,7 +102,7 @@ WHERE src.target_domain_id = 'Procedure'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_procedure_occurrence
-SELECT uuid_hash(uuid_nil())                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')  AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,
@@ -138,7 +140,7 @@ WHERE src.target_domain_id = 'Procedure'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_procedure_occurrence
-SELECT uuid_hash(uuid_nil())                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')  AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,

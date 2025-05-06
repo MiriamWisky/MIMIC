@@ -2,12 +2,28 @@ DROP TABLE if EXISTS lk_datetimeevents_concept;
 DROP TABLE if EXISTS lk_proc_event_clean;
 DROP TABLE if EXISTS lk_datetimeevents_clean;
 
+
+DROP TABLE IF EXISTS lk_hcpcsevents_clean;
+
+CREATE TABLE lk_hcpcsevents_clean (
+    subject_id INTEGER,
+    hadm_id INTEGER,
+    start_datetime TIMESTAMP,
+    seq_num INTEGER,
+    hcpcs_cd TEXT,
+    short_description TEXT,
+    load_table_id TEXT,
+    load_row_id INTEGER,
+    trace_id JSON
+); 
+
 -- -------------------------------------------------------------------
 -- lk_hcpcsevents_clean
 -- Rule 1, HCPCS mapping
 -- -------------------------------------------------------------------
 
-CREATE TABLE lk_hcpcsevents_clean AS
+-- CREATE TABLE lk_hcpcsevents_clean AS
+INSERT INTO lk_hcpcsevents_clean
 SELECT src.subject_id        AS subject_id,
        src.hadm_id           AS hadm_id,
        adm.dischtime         AS start_datetime,
@@ -42,7 +58,7 @@ SELECT src.subject_id                 AS subject_id,
            END                        AS source_vocabulary_id,
        replace(src.icd_code, '.', '') AS source_code, -- to join lk_icd_proc_concept
        --
-       src.load_table_id              AS load_table_id,
+       src.load_table_id::text              AS load_table_id,
        src.load_row_id                AS load_row_id,
        src.trace_id                   AS trace_id
 FROM src_procedures_icd src
@@ -63,8 +79,8 @@ SELECT src.subject_id    AS subject_id,
        src.value         AS quantity,
        src.itemid        AS itemid,
        -- THEN it stores the duration... this is a warkaround and may be inproved
-       --
-       'procedureevents' AS unit_id,
+
+    CAST('procedureevents' AS TEXT) AS unit_id,
        src.load_table_id AS load_table_id,
        src.load_row_id   AS load_row_id,
        src.trace_id      AS trace_id
@@ -84,8 +100,7 @@ SELECT src.subject_id    AS subject_id,
        src.value         AS start_datetime,
        1                 AS quantity,
        src.itemid        AS itemid,
-       --
-       'datetimeevents'  AS unit_id,
+    CAST('datetimeevents' AS TEXT) AS unit_id,
        src.load_table_id AS load_table_id,
        src.load_row_id   AS load_row_id,
        src.trace_id      AS trace_id
@@ -194,11 +209,32 @@ WHERE d_items.linksto IN (
 -- -------------------------------------------------------------------
 
 -- Rule 1, HCPCS
+CREATE TABLE lk_procedure_mapped (
+    subject_id INTEGER,
+    hadm_id INTEGER,
+    start_datetime TIMESTAMP,
+    type_concept_id INTEGER,
+    quantity NUMERIC,
+    itemid INTEGER,
+    source_code TEXT,
+    source_label TEXT,
+    source_vocabulary_id TEXT,
+    source_domain_id TEXT,
+    source_concept_id INTEGER,
+    target_domain_id TEXT,
+    target_concept_id INTEGER,
+    unit_id TEXT,
+    load_table_id TEXT,
+    load_row_id INTEGER,
+    trace_id JSON
+);
 
-CREATE TABLE lk_procedure_mapped AS
+
+-- CREATE TABLE lk_procedure_mapped AS
+INSERT INTO lk_procedure_mapped
 SELECT src.subject_id                    AS subject_id,      -- to person
        src.hadm_id                       AS hadm_id,         -- to visit
-       src.start_datetime                AS start_datetime,
+       src.start_datetime                AS start_datetime, --                                  try
        32821                             AS type_concept_id, -- OMOP4976894 EHR billing record
        CAST(1 AS NUMERIC)                AS quantity,
        CAST(NULL AS INTEGER)             AS itemid,
@@ -209,8 +245,8 @@ SELECT src.subject_id                    AS subject_id,      -- to person
        COALESCE(lc.source_concept_id, 0) AS source_concept_id,
        lc.target_domain_id               AS target_domain_id,
        COALESCE(lc.target_concept_id, 0) AS target_concept_id,
-       --
-       'proc.hcpcsevents'                AS unit_id,
+
+        CAST('proc.hcpcsevents' AS text) AS unit_id,
        src.load_table_id                 AS load_table_id,
        src.load_row_id                   AS load_row_id,
        src.trace_id                      AS trace_id
@@ -219,6 +255,9 @@ FROM lk_hcpcsevents_clean src
      lk_hcpcs_concept lc
      ON src.hcpcs_cd = lc.source_code
 ;
+
+
+
 
 -- Rule 2, ICD
 
@@ -236,8 +275,8 @@ SELECT src.subject_id                    AS subject_id,      -- to person
        COALESCE(lc.source_concept_id, 0) AS source_concept_id,
        lc.target_domain_id               AS target_domain_id,
        COALESCE(lc.target_concept_id, 0) AS target_concept_id,
-       --
-       'proc.procedures_icd'             AS unit_id,
+
+        CAST('proc.procedures_icd' AS TEXT) AS unit_id,
        src.load_table_id                 AS load_table_id,
        src.load_row_id                   AS load_row_id,
        src.trace_id                      AS trace_id
@@ -266,7 +305,8 @@ SELECT src.subject_id                    AS subject_id,      -- to person
        lc.target_domain_id               AS target_domain_id,
        COALESCE(lc.target_concept_id, 0) AS target_concept_id,
        --
-       concat('proc.', src.unit_id)      AS unit_id,
+       CAST(concat('proc.', src.unit_id) AS TEXT)      AS unit_id,
+
        src.load_table_id                 AS load_table_id,
        src.load_row_id                   AS load_row_id,
        src.trace_id                      AS trace_id

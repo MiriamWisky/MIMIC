@@ -36,6 +36,10 @@ FROM tmp_subject_ethnicity src
 -- -------------------------------------------------------------------
 -- cdm_person
 -- -------------------------------------------------------------------
+<<<<<<< HEAD
+=======
+DROP TABLE IF EXISTS cdm_person;
+>>>>>>> postgres
 
 --HINT DISTRIBUTE_ON_KEY(person_id)
 CREATE TABLE cdm_person
@@ -67,13 +71,13 @@ CREATE TABLE cdm_person
 ;
 
 INSERT INTO cdm_person
-SELECT row_number() OVER (ORDER BY random())                 AS person_id,
+SELECT NEXTVAL('global_id_seq')                AS person_id,
        CASE
            WHEN p.gender = 'F' THEN 8532 -- FEMALE
            WHEN p.gender = 'M' THEN 8507 -- MALE
            ELSE 0
            END                      AS gender_concept_id,
-       p.anchor_year                AS year_of_birth,
+       (p.anchor_year - p.anchor_age)                AS year_of_birth,
        CAST(NULL AS INTEGER)        AS month_of_birth,
        CAST(NULL AS INTEGER)        AS day_of_birth,
        CAST(NULL AS TIMESTAMP)      AS birth_datetime,
@@ -100,12 +104,15 @@ SELECT row_number() OVER (ORDER BY random())                 AS person_id,
                THEN eth.ethnicity_first
            ELSE NULL
            END                      AS race_source_value,
-       COALESCE(
-               CASE
-                   WHEN map_eth.target_vocabulary_id <> 'Ethnicity'
-                       THEN map_eth.source_concept_id
-                   ELSE NULL
-                   END, 0)          AS race_source_concept_id,
+           COALESCE(
+        CASE
+
+            WHEN map_eth.target_vocabulary_id <> 'Ethnicity'
+                THEN map_eth.source_concept_id
+            ELSE NULL
+        END, 0
+        ) AS race_source_concept_id,
+
        CASE
            WHEN map_eth.target_vocabulary_id = 'Ethnicity'
                THEN eth.ethnicity_first

@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS tmp_custom_concept;
 CREATE TABLE tmp_custom_concept AS (
 SELECT
     voc.source_concept_id           AS concept_id,
@@ -35,6 +36,8 @@ GROUP BY
 );
 
 -- tmp_custom_concept_relationship
+
+DROP TABLE IF EXISTS tmp_custom_concept_relationship;
 
 CREATE TABLE tmp_custom_concept_relationship AS (
 SELECT
@@ -78,6 +81,8 @@ WHERE
 
 -- tmp_custom_vocabulary
 
+DROP TABLE IF EXISTS tmp_custom_vocabulary_dist;
+
 CREATE TABLE tmp_custom_vocabulary_dist AS (
 SELECT
     voc.source_vocabulary_id        AS source_vocabulary_id,
@@ -89,6 +94,9 @@ FROM
 GROUP BY
     voc.source_vocabulary_id
 );
+
+
+DROP TABLE IF EXISTS tmp_custom_vocabulary;
 
 CREATE TABLE tmp_custom_vocabulary AS (
 SELECT
@@ -107,39 +115,39 @@ FROM
     tmp_custom_vocabulary_dist voc
 );
 
+
 -- -------------------------------------------------------------------
 -- Re-write voc_concept to remove previous version of custom concept
 -- Keep PEDSnet originated custom concepts
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS tmp_voc_concept;
 
 CREATE TABLE tmp_voc_concept AS (
 SELECT *
 FROM
-    concept
+    voc_concept
 WHERE
     concept_id < 2000000000
 );
 
 -- ----------------------------------------------------------------------
--- Re-write Custom Relationships table to remove rows related to custom concepts
+-- Re-write voc_concept_relationship to remove previous custom relationships
 -- Keep links to PEDSnet originated custom concepts
 -- ----------------------------------------------------------------------
+DROP TABLE IF EXISTS tmp_voc_concept_relationship;
 
 CREATE TABLE tmp_voc_concept_relationship AS (
 SELECT vr.*
 FROM
-    concept_relationship vr
+    voc_concept_relationship vr
 INNER JOIN
     tmp_voc_concept vc1
-        ON  vc1.concept_id = vr.concept_id_1
+        ON vc1.concept_id = vr.concept_id_1
 INNER JOIN
     tmp_voc_concept vc2
-        ON  vc2.concept_id = vr.concept_id_2
+        ON vc2.concept_id = vr.concept_id_2
 );
 
--- -------------------------------------------------------------------
--- Add new custom concepts to the re-written
--- -------------------------------------------------------------------
 
 INSERT INTO tmp_voc_concept
 SELECT
@@ -154,17 +162,21 @@ SELECT
     voc.valid_end_date          AS valid_end_date,
     voc.invalid_reason          AS invalid_reason
 FROM 
-    tmp_custom_concept voc
-;
+    tmp_custom_concept voc;
 
-CREATE TABLE concept AS (
+
+-- ----------------------------------------------------------------------
+-- Create final tables with updated content
+-- ----------------------------------------------------------------------
+DROP TABLE IF EXISTS voc_concept;
+CREATE TABLE voc_concept AS (
 SELECT * 
-FROM tmp_voc_concept);
+FROM tmp_voc_concept
+);
 
 -- ----------------------------------------------------------------------
--- Add relationships to the added custom concepts
+-- Insert new custom relationships to voc_concept_relationship
 -- ----------------------------------------------------------------------
-
 INSERT INTO tmp_voc_concept_relationship
 SELECT
     tcr.concept_id_1             AS concept_id_1,
@@ -174,29 +186,32 @@ SELECT
     tcr.valid_end_date           AS valid_end_date,
     tcr.invalid_reason           AS invalid_reason
 FROM 
-    tmp_custom_concept_relationship tcr
-;
+    tmp_custom_concept_relationship tcr;
 
-CREATE TABLE concept_relationship AS (
-SELECT *
-FROM tmp_voc_concept_relationship);
+
+DROP TABLE IF EXISTS voc_concept_relationship;
+CREATE TABLE voc_concept_relationship AS (
+SELECT * 
+FROM tmp_voc_concept_relationship
+);
+
 
 -- ----------------------------------------------------------------------
--- Re-write vocabularies to remove previous version of custom vocabularies
+-- Re-write voc_vocabulary to remove previous version of custom vocabularies
 -- ----------------------------------------------------------------------
+DROP TABLE IF EXISTS tmp_voc_vocabulary;
 
 CREATE TABLE tmp_voc_vocabulary AS (
 SELECT *
 FROM
-    vocabulary
+    voc_vocabulary
 WHERE
     vocabulary_concept_id < 2000000000
 );
 
 -- ----------------------------------------------------------------------
--- Add custom vocabularies to Vocabulary and Concept table
+-- Remove previous custom vocabularies, insert new ones
 -- ----------------------------------------------------------------------
-
 INSERT INTO tmp_voc_vocabulary
 SELECT
     voc.vocabulary_id         AS vocabulary_id,
@@ -205,14 +220,22 @@ SELECT
     voc.vocabulary_version    AS vocabulary_version,
     voc.vocabulary_concept_id AS vocabulary_concept_id
 FROM 
-    tmp_custom_vocabulary voc
-;
+    tmp_custom_vocabulary voc;
 
-CREATE TABLE vocabulary AS (
-SELECT *
-FROM tmp_voc_vocabulary);
+-- ----------------------------------------------------------------------
+-- Remove previous version of custom concepts, insert new ones
+-- ----------------------------------------------------------------------
 
-INSERT INTO concept
+DROP TABLE IF EXISTS voc_vocabulary;
+CREATE TABLE voc_vocabulary AS (
+SELECT * 
+FROM tmp_voc_vocabulary
+);
+
+-- ----------------------------------------------------------------------
+-- Insert new vocabularies into voc_concept
+-- ----------------------------------------------------------------------
+INSERT INTO voc_concept
 SELECT
     vcv.vocabulary_concept_id   AS concept_id,
     vcv.vocabulary_name         AS concept_name,
@@ -225,15 +248,12 @@ SELECT
     CAST('2099-12-31' AS DATE)  AS valid_end_date,
     NULL                        AS invalid_reason
 FROM 
-    tmp_custom_vocabulary vcv 
-;
-
+    tmp_custom_vocabulary vcv;
 
 -- -------------------------------------------------------------------
--- save source rows with conflicting concept_id, if any is left,
--- into table
--- tmp_custom_concept_skipped
+-- Save skipped custom concepts that conflict with existing ones
 -- -------------------------------------------------------------------
+DROP TABLE IF EXISTS tmp_custom_concept_skipped;
 
 CREATE TABLE tmp_custom_concept_skipped AS (
 SELECT
@@ -241,8 +261,188 @@ SELECT
 FROM
     tmp_custom_concept tcc
 INNER JOIN
-    concept vc
+    voc_concept vc
         ON  tcc.concept_id = vc.concept_id
         AND tcc.concept_name <> vc.concept_name
 );
+
+
+
+
+
+-- -- -------------------------------------------------------------------
+-- -- Re-write voc_concept to remove previous version of custom concept
+-- -- Keep PEDSnet originated custom concepts
+-- -- -------------------------------------------------------------------
+-- DROP TABLE IF EXISTS tmp_voc_concept;
+
+-- CREATE TABLE tmp_voc_concept AS (
+-- SELECT *
+-- FROM
+--     concept
+-- WHERE
+--     concept_id < 2000000000
+-- );
+
+-- -- ----------------------------------------------------------------------
+-- -- Re-write Custom Relationships table to remove rows related to custom concepts
+-- -- Keep links to PEDSnet originated custom concepts
+-- -- ----------------------------------------------------------------------
+-- DROP TABLE IF EXISTS tmp_voc_concept_relationship;
+
+-- CREATE TABLE tmp_voc_concept_relationship AS (
+-- SELECT vr.*
+-- FROM
+--     concept_relationship vr
+-- INNER JOIN
+--     tmp_voc_concept vc1
+--         ON  vc1.concept_id = vr.concept_id_1
+-- INNER JOIN
+--     tmp_voc_concept vc2
+--         ON  vc2.concept_id = vr.concept_id_2
+-- );
+
+-- -- -------------------------------------------------------------------
+-- -- Add new custom concepts to the re-written
+-- -- -------------------------------------------------------------------
+
+-- INSERT INTO tmp_voc_concept
+-- SELECT
+--     voc.concept_id              AS concept_id,
+--     voc.concept_name            AS concept_name,
+--     voc.domain_id               AS domain_id,
+--     voc.vocabulary_id           AS vocabulary_id,
+--     voc.concept_class_id        AS concept_class_id,
+--     voc.standard_concept        AS standard_concept,
+--     voc.concept_code            AS concept_code,
+--     voc.valid_start_date        AS valid_start_date,
+--     voc.valid_end_date          AS valid_end_date,
+--     voc.invalid_reason          AS invalid_reason
+-- FROM 
+--     tmp_custom_concept voc
+-- ;
+
+
+
+
+
+
+
+
+-- -- DROP TABLE IF EXISTS concept;
+-- DROP VIEW IF EXISTS concept CASCADE;
+
+-- CREATE TABLE concept AS (
+-- SELECT * 
+-- FROM tmp_voc_concept);
+
+
+
+
+
+
+
+
+
+
+
+
+-- -- ----------------------------------------------------------------------
+-- -- Add relationships to the added custom concepts
+-- -- ----------------------------------------------------------------------
+
+-- INSERT INTO tmp_voc_concept_relationship
+-- SELECT
+--     tcr.concept_id_1             AS concept_id_1,
+--     tcr.concept_id_2             AS concept_id_2,
+--     tcr.relationship_id          AS relationship_id,
+--     tcr.valid_start_date         AS valid_start_date,
+--     tcr.valid_end_date           AS valid_end_date,
+--     tcr.invalid_reason           AS invalid_reason
+-- FROM 
+--     tmp_custom_concept_relationship tcr
+-- ;
+
+
+
+
+-- -- DROP TABLE IF EXISTS concept_relationship;
+-- DROP VIEW IF EXISTS concept_relationship CASCADE;
+
+
+-- CREATE TABLE concept_relationship AS (
+-- SELECT *
+-- FROM tmp_voc_concept_relationship);
+
+-- -- ----------------------------------------------------------------------
+-- -- Re-write vocabularies to remove previous version of custom vocabularies
+-- -- ----------------------------------------------------------------------
+-- DROP TABLE IF EXISTS tmp_voc_vocabulary;
+
+-- CREATE TABLE tmp_voc_vocabulary AS (
+-- SELECT *
+-- FROM
+--     vocabulary
+-- WHERE
+--     vocabulary_concept_id < 2000000000
+-- );
+
+-- -- ----------------------------------------------------------------------
+-- -- Add custom vocabularies to Vocabulary and Concept table
+-- -- ----------------------------------------------------------------------
+
+-- INSERT INTO tmp_voc_vocabulary
+-- SELECT
+--     voc.vocabulary_id         AS vocabulary_id,
+--     voc.vocabulary_name       AS vocabulary_name,
+--     voc.vocabulary_reference  AS vocabulary_reference,
+--     voc.vocabulary_version    AS vocabulary_version,
+--     voc.vocabulary_concept_id AS vocabulary_concept_id
+-- FROM 
+--     tmp_custom_vocabulary voc
+-- ;
+
+
+-- -- DROP TABLE IF EXISTS vocabulary;
+-- DROP VIEW IF EXISTS vocabulary CASCADE;
+
+
+-- CREATE TABLE vocabulary AS (
+-- SELECT *
+-- FROM tmp_voc_vocabulary);
+
+-- INSERT INTO concept
+-- SELECT
+--     vcv.vocabulary_concept_id   AS concept_id,
+--     vcv.vocabulary_name         AS concept_name,
+--     'Metadata'                  AS domain_id,
+--     'Vocabulary'                AS vocabulary_id,
+--     'Vocabulary'                AS concept_class_id,
+--     'S'                         AS standard_concept,
+--     vcv.vocabulary_reference    AS concept_code,
+--     CAST('1970-01-01' AS DATE)  AS valid_start_date,
+--     CAST('2099-12-31' AS DATE)  AS valid_end_date,
+--     NULL                        AS invalid_reason
+-- FROM 
+--     tmp_custom_vocabulary vcv 
+-- ;
+
+
+-- -- -------------------------------------------------------------------
+-- -- save source rows with conflicting concept_id, if any is left,
+-- -- into table
+-- -- tmp_custom_concept_skipped
+-- -- -------------------------------------------------------------------
+-- DROP TABLE IF EXISTS tmp_custom_concept_skipped;
+
+-- CREATE TABLE tmp_custom_concept_skipped AS (
+-- SELECT
+--     tcc.*
+-- FROM
+--     tmp_custom_concept tcc
+-- INNER JOIN
+--     concept vc
+--         ON  tcc.concept_id = vc.concept_id
+--         AND tcc.concept_name <> vc.concept_name
+-- );
 
