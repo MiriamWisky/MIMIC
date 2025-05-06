@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS lk_micro_cross_ref;
 
 CREATE TABLE lk_micro_cross_ref AS
 SELECT trace_id                               AS trace_id_ab,   -- for antibiotics
@@ -208,7 +209,7 @@ DROP TABLE IF EXISTS lk_specimen_mapped;
 -- OR
 -- REPLACE
 CREATE TABLE lk_specimen_mapped AS
-SELECT row_number() OVER ()                              AS specimen_id,
+SELECT NEXTVAL('global_id_seq')                              AS specimen_id,
        src.subject_id                            AS subject_id,
        COALESCE(src.hadm_id, hadm.hadm_id)       AS hadm_id,
        CAST(src.start_datetime AS DATE)          AS date_id,
@@ -243,7 +244,7 @@ DROP TABLE IF EXISTS lk_meas_organism_mapped;
 -- OR
 -- REPLACE
 CREATE TABLE lk_meas_organism_mapped AS
-SELECT row_number() OVER ()                                 AS measurement_id,
+SELECT NEXTVAL('global_id_seq')                                 AS measurement_id,
        src.subject_id                               AS subject_id,
        COALESCE(src.hadm_id, hadm.hadm_id)          AS hadm_id,
        CAST(src.start_datetime AS DATE)             AS date_id,
@@ -293,7 +294,7 @@ DROP TABLE IF EXISTS lk_meas_ab_mapped;
 -- OR
 -- REPLACE
 CREATE TABLE lk_meas_ab_mapped AS
-SELECT row_number() OVER ()                                 AS measurement_id,
+SELECT NEXTVAL('global_id_seq')                                 AS measurement_id,
        src.subject_id                               AS subject_id,
        COALESCE(src.hadm_id, hadm.hadm_id)          AS hadm_id,
        CAST(src.start_datetime AS DATE)             AS date_id,

@@ -8,7 +8,7 @@ SELECT hadm_id    AS hadm_id,
     CAST(0 AS INTEGER)                    AS cancelreason, -- MIMIC IV 2.0 change, the field is removed
     --
     'procedureevents'                   AS load_table_id,
-    row_number() OVER()   AS load_row_id,
+    NEXTVAL('global_id_seq')   AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id','starttime'],
                ARRAY[subject_id::text,hadm_id::text, starttime::text]
@@ -33,7 +33,7 @@ SELECT itemid       AS itemid,
        -- highnormalvalue
        --
        'd_items'    AS load_table_id,
-       row_number() OVER() AS load_row_id,
+       NEXTVAL('global_id_seq') AS load_row_id,
        json_object(
                ARRAY['itemid','linksto'],
                ARRAY[itemid::text,linksto::text]
@@ -54,7 +54,7 @@ SELECT subject_id AS subject_id,
        value AS VALUE,
     --
     'datetimeevents'                    AS load_table_id,
-    row_number() OVER()   AS load_row_id,
+    NEXTVAL('global_id_seq')   AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id', 'stay_id', 'charttime'],
                ARRAY[subject_id::text,hadm_id::text, stay_id::text,charttime::text]
@@ -75,7 +75,7 @@ SELECT subject_id AS subject_id,
     valueuom    AS valueuom,
     --
     'chartevents'                       AS load_table_id,
-    row_number() OVER()   AS load_row_id,
+    NEXTVAL('global_id_seq')   AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id', 'stay_id', 'charttime'],
                ARRAY[subject_id::text,hadm_id::text, stay_id::text,charttime::text]

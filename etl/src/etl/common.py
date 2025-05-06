@@ -13,6 +13,9 @@ import psycopg
 import pyarrow, pyarrow.csv
 import sqlparse
 
+
+from urllib.parse import quote
+
 from .config import (
     ETL_DIR,
     PGHOST,
@@ -115,9 +118,14 @@ SITE_LIST = ['columbia',
 
 @contextlib.contextmanager
 def postgresql_cursor():
+
+
+    password = quote(PGPASSWORD)
     
     pgdbname = os.environ['MODEPGDB']
-    with psycopg.connect(f'postgresql://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{pgdbname}') as conn:
+    # with psycopg.connect(f'postgresql://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{pgdbname}') as conn:
+    with psycopg.connect(f'postgresql://{PGUSER}:{password}@{PGHOST}:{PGPORT}/{pgdbname}') as conn:
+
         with conn.cursor() as c:
             yield c
 def subprocess_run(command, input=None, cwd=None, env=None, check=True):

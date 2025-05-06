@@ -1,6 +1,11 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+DROP SEQUENCE IF EXISTS global_id_seq;
+
+CREATE SEQUENCE global_id_seq START WITH 1 INCREMENT BY 1;
+
+
 CREATE TABLE src_patients AS
 SELECT subject_id                        AS subject_id,
        anchor_year                       AS anchor_year,
@@ -9,7 +14,7 @@ SELECT subject_id                        AS subject_id,
        gender                            AS gender,
        --
        'patients'                        AS load_table_id,
-       row_number() OVER() AS load_row_id,
+       NEXTVAL('global_id_seq') AS load_row_id,
        json_object(
                ARRAY['subject_id'],
                ARRAY[subject_id::text]
@@ -38,7 +43,7 @@ SELECT hadm_id            AS hadm_id,   -- PK
        -- hospital_expire_flag
        --
     'admissions' AS load_table_id,
-    row_number() OVER() AS load_row_id,
+    NEXTVAL('global_id_seq') AS load_row_id,
     json_object(
                ARRAY['subject_id','hadm_id'],
                ARRAY[subject_id::text,hadm_id::text]
@@ -61,7 +66,7 @@ SELECT transfer_id                       AS transfer_id,
        eventtype                         AS eventtype,
        --
        'transfers'                       AS load_table_id,
-       row_number() OVER() AS load_row_id,
+       NEXTVAL('global_id_seq') AS load_row_id,
        json_object(
                ARRAY['subject_id','hadm_id', 'transfer_id'],
                ARRAY[subject_id::text,hadm_id::text, transfer_id::text]

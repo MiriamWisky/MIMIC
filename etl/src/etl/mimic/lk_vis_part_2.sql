@@ -76,14 +76,7 @@ SELECT src.subject_id           AS subject_id,
        'no_hadm'                AS unit_id,
        'lk_visit_no_hadm_all'   AS load_table_id,
         0                        AS load_row_id,
-    --    json_build_object(
-    --     'case_id', src.case_id::text,
-    --     'date_id', src.date_id::text
-    -- ) AS trace_id                    
-    --    json_object(
-    --            ARRAY['case_id','date_id'],
-    --            ARRAY[case_id::text,src.date_id::text]
-    --        )          AS trace_id
+
     json_object(
                ARRAY['date_id'],
                ARRAY[src.date_id::text]
@@ -128,7 +121,7 @@ GROUP BY src.subject_id,
 -- -------------------------------------------------------------------
 
 CREATE TABLE lk_visit_clean AS
-SELECT row_number() OVER ()           AS visit_occurrence_id,
+SELECT NEXTVAL('global_id_seq')           AS visit_occurrence_id,
        src.subject_id         AS subject_id,
        src.hadm_id            AS hadm_id,
        CAST(NULL AS DATE)     AS date_id,
@@ -148,7 +141,7 @@ SELECT row_number() OVER ()           AS visit_occurrence_id,
        src.trace_id           AS trace_id
 FROM lk_admissions_clean src -- adm
 UNION ALL
-SELECT row_number() OVER ()           AS visit_occurrence_id,
+SELECT NEXTVAL('global_id_seq')           AS visit_occurrence_id,
        src.subject_id         AS subject_id,
        CAST(NULL AS INTEGER)  AS hadm_id,
        src.date_id            AS date_id,
@@ -177,7 +170,7 @@ FROM lk_visit_no_hadm_dist src -- adm
 -- -------------------------------------------------------------------
 
 CREATE TABLE lk_visit_detail_clean AS
-SELECT row_number() OVER ()         AS visit_detail_id,
+SELECT NEXTVAL('global_id_seq')         AS visit_detail_id,
        src.subject_id       AS subject_id,
        src.hadm_id          AS hadm_id,
        src.date_id          AS date_id,
@@ -205,7 +198,7 @@ WHERE src.hadm_id IS NOT NULL -- some ER transfers are excluded because not all 
 -- ER admissions
 -- -------------------------------------------------------------------
 INSERT INTO lk_visit_detail_clean
-SELECT row_number() OVER ()                     AS visit_detail_id,
+SELECT NEXTVAL('global_id_seq')                     AS visit_detail_id,
        src.subject_id                   AS subject_id,
        src.hadm_id                      AS hadm_id,
        CAST(src.start_datetime AS DATE) AS date_id,
@@ -232,7 +225,7 @@ WHERE src.is_er_admission
 -- services
 -- -------------------------------------------------------------------
 INSERT INTO lk_visit_detail_clean
-SELECT row_number() OVER ()                     AS visit_detail_id,
+SELECT NEXTVAL('global_id_seq')                     AS visit_detail_id,
        src.subject_id                   AS subject_id,
        src.hadm_id                      AS hadm_id,
        CAST(src.start_datetime AS DATE)               AS date_id,

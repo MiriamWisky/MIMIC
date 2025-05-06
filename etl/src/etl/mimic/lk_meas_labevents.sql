@@ -30,14 +30,6 @@ SELECT row_number() OVER ()   AS measurement_id,
             THEN SUBSTRING(src.value FROM 1 FOR 1)
     END AS value_operator,
     SUBSTRING(src.value FROM '([-]?[\d]+[.]?[\d]*)') AS value_number, -- assume "-0.34 etc"
-    -- CASE
-    --     WHEN subtext(src.value,1, 1) IN ('<', '>')
-    --              AND subtext(src.value,2, 1) = '='
-    --         THEN subtext(src.value,1, 2)
-    --     WHEN subtext(src.value,1, 1) IN ('=', '<', '>')
-    --         THEN subtext(src.value,1, 1)
-    -- END AS value_operator,
-    -- REGEXP_EXTRACT(src.value, r'([-]?[\d]+[.]?[\d]*)')    AS value_number, -- assume "-0.34 etc"
     CASE WHEN TRIM(src.valueuom) <> '' THEN src.valueuom END    AS valueuom, -- unit_source_value,
     src.ref_range_lower                     AS ref_range_lower,
     src.ref_range_upper                     AS ref_range_upper,

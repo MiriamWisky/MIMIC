@@ -119,7 +119,7 @@ CREATE TABLE cdm_condition_era
 -- 30 days window is allowed.
 -- -------------------------------------------------------------------
 INSERT INTO cdm_condition_era
-SELECT row_number() OVER ()                         AS condition_era_id,
+SELECT NEXTVAL('global_id_seq')                         AS condition_era_id,
        person_id                            AS person_id,
        condition_concept_id                 AS condition_concept_id,
        MIN(condition_start_date)            AS condition_era_start_date,

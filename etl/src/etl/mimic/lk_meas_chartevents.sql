@@ -15,14 +15,10 @@ SELECT src.subject_id             AS subject_id,
     CASE
         WHEN TRIM(src.value) ~ '(^[-]?[\d]+[.]?[\d]*[ ]*[a-z]+$)' THEN
             TRIM(regexp_replace(TRIM(src.value), '([-]?[\d]+[.]?[\d]*)', '', 'g'))
+            -- TRIM(regexp_replace(TRIM(src.value), '([\d]+)', '', 'g'))
         ELSE src.valueuom
-    END AS valueuom,
-    -- CASE WHEN REGEXP_EXTRACT(TRIM(src.value), r'(^[-]?[\d]+[.]?[\d]*[ ]*[a-z]+$)') IS NOT NULL
-    --     THEN CAST(REGEXP_EXTRACT(src.value, r'([-]?[\d]+[.]?[\d]*)') AS NUMERIC)
-    --     ELSE src.valuenum END AS valuenum,
-    -- CASE WHEN REGEXP_EXTRACT(TRIM(src.value), r'(^[-]?[\d]+[.]?[\d]*[ ]*[a-z]+$)') IS NOT NULL
-    --     THEN TRIM(REGEXP_REPLACE(src.value, r'(\d+)', ''))
-    --     ELSE src.valueuom END   AS valueuom, -- unit of measurement
+    END AS valueuom, -- unit of measurement
+
     --
     'chartevents'           AS unit_id,
     src.load_table_id       AS load_table_id,
@@ -114,7 +110,7 @@ DROP TABLE if EXISTS tmp_chartevents_code_dist;
 -- -------------------------------------------------------------------
 
 CREATE TABLE lk_chartevents_mapped AS
-SELECT row_number() OVER ()                                AS measurement_id,
+SELECT NEXTVAL('global_id_seq')                                AS measurement_id,
        src.subject_id                              AS subject_id,
        src.hadm_id                                 AS hadm_id,
        src.stay_id                                 AS stay_id,

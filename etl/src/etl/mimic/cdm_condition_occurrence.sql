@@ -32,7 +32,7 @@ CREATE TABLE cdm_condition_occurrence
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_condition_occurrence
-SELECT row_number() OVER ()                       AS condition_occurrence_id,
+SELECT NEXTVAL('global_id_seq')                       AS condition_occurrence_id,
        per.person_id                      AS person_id,
        COALESCE(src.target_concept_id, 0) AS condition_concept_id,
        CAST(src.start_datetime AS DATE)   AS condition_start_date,
@@ -69,8 +69,9 @@ WHERE src.target_domain_id = 'Condition'
 -- Chartevents.value
 -- -------------------------------------------------------------------
 
+
 INSERT INTO cdm_condition_occurrence
-SELECT row_number() OVER ()                       AS condition_occurrence_id,
+    SELECT NEXTVAL('global_id_seq')  AS condition_occurrence_id,
        per.person_id                      AS person_id,
        COALESCE(src.target_concept_id, 0) AS condition_concept_id,
        CAST(src.start_datetime AS DATE)   AS condition_start_date,
@@ -110,7 +111,7 @@ WHERE src.target_domain_id = 'Condition'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_condition_occurrence
-SELECT row_number() OVER ()                       AS condition_occurrence_id,
+SELECT NEXTVAL('global_id_seq')  AS condition_occurrence_id,
        per.person_id                      AS person_id,
        COALESCE(src.target_concept_id, 0) AS condition_concept_id,
        CAST(src.start_datetime AS DATE)   AS condition_start_date,

@@ -41,7 +41,7 @@ CREATE TABLE cdm_metadata
   metadata_concept_id       INTEGER       NOT NULL ,
   metadata_type_concept_id  INTEGER       NOT NULL ,
   NAME                      text      NOT NULL ,
-  value_as_text           text               ,
+  value_as_string           text               ,
   value_as_concept_id       INTEGER                ,
   metadata_date             DATE                 ,
   metadata_datetime         TIMESTAMP
@@ -349,7 +349,7 @@ CREATE TABLE cdm_observation
   observation_datetime          TIMESTAMP           ,
   observation_type_concept_id   INTEGER     NOT NULL ,
   value_as_number               NUMERIC        ,
-  value_as_text               text         ,
+  value_as_string               text         ,
   value_as_concept_id           INTEGER          ,
   qualifier_concept_id          INTEGER          ,
   unit_concept_id               INTEGER          ,

@@ -16,7 +16,6 @@ SELECT DISTINCT src.subject_id,
         partition BY src.subject_id
         ORDER BY src.admittime ASC
     )                                   AS load_row_id,
-    -- nth_value(src.trace_id, 1) over(
     nth_value(src.trace_id::text, 1) over(
         partition BY src.subject_id
         ORDER BY src.admittime ASC

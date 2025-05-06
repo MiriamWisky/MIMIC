@@ -125,7 +125,7 @@ CREATE TABLE cdm_observation_period
 ;
 
 INSERT INTO cdm_observation_period
-SELECT row_number() OVER ()         AS observation_period_id,
+SELECT NEXTVAL('global_id_seq')         AS observation_period_id,
        src.person_id        AS person_id,
        MIN(src.start_date)  AS observation_period_start_date,
        MAX(src.end_date)    AS observation_period_end_date,

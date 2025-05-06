@@ -22,7 +22,6 @@ SELECT
     CAST(src.ndc AS text)                                                    AS ndc_source_code,
     'NDC'                                                                      AS ndc_source_vocabulary,
     src.form_val_disp                                                          AS form_val_disp,
-    -- CAST(regexp_extract(src.form_val_disp, r'([-]?[\d]+[.]?[\d]*)') AS NUMERIC) AS quantity,
     CAST(
         substring(src.form_val_disp FROM '([-]?[\d]+[.]?[\d]*)') AS NUMERIC
     ) AS quantity,

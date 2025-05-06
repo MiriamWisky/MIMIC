@@ -16,19 +16,6 @@ CREATE TABLE lk_hcpcsevents_clean (
     load_row_id INTEGER,
     trace_id JSON
 ); 
--- AS
--- SELECT
---     src.subject_id        AS subject_id,
---     src.hadm_id           AS hadm_id,
---     adm.dischtime         AS start_datetime,
---     src.seq_num           AS seq_num,
---     src.hcpcs_cd          AS hcpcs_cd,
---     src.short_description AS short_description,
---     src.load_table_id     AS load_table_id,
---     src.load_row_id       AS load_row_id,
---     src.trace_id          AS trace_id
--- FROM src_hcpcsevents src
--- INNER JOIN src_admissions adm ON src.hadm_id = adm.hadm_id;
 
 -- -------------------------------------------------------------------
 -- lk_hcpcsevents_clean
@@ -92,8 +79,7 @@ SELECT src.subject_id    AS subject_id,
        src.value         AS quantity,
        src.itemid        AS itemid,
        -- THEN it stores the duration... this is a warkaround and may be inproved
-       --
-    --    'procedureevents' AS unit_id,
+
     CAST('procedureevents' AS TEXT) AS unit_id,
        src.load_table_id AS load_table_id,
        src.load_row_id   AS load_row_id,
@@ -114,8 +100,6 @@ SELECT src.subject_id    AS subject_id,
        src.value         AS start_datetime,
        1                 AS quantity,
        src.itemid        AS itemid,
-       --
-    --    'datetimeevents'  AS unit_id,
     CAST('datetimeevents' AS TEXT) AS unit_id,
        src.load_table_id AS load_table_id,
        src.load_row_id   AS load_row_id,
@@ -261,8 +245,7 @@ SELECT src.subject_id                    AS subject_id,      -- to person
        COALESCE(lc.source_concept_id, 0) AS source_concept_id,
        lc.target_domain_id               AS target_domain_id,
        COALESCE(lc.target_concept_id, 0) AS target_concept_id,
-       --
-    --    'proc.hcpcsevents'                AS unit_id,
+
         CAST('proc.hcpcsevents' AS text) AS unit_id,
        src.load_table_id                 AS load_table_id,
        src.load_row_id                   AS load_row_id,
@@ -292,8 +275,7 @@ SELECT src.subject_id                    AS subject_id,      -- to person
        COALESCE(lc.source_concept_id, 0) AS source_concept_id,
        lc.target_domain_id               AS target_domain_id,
        COALESCE(lc.target_concept_id, 0) AS target_concept_id,
-       --
-    --    'proc.procedures_icd'             AS unit_id,
+
         CAST('proc.procedures_icd' AS TEXT) AS unit_id,
        src.load_table_id                 AS load_table_id,
        src.load_row_id                   AS load_row_id,
@@ -323,8 +305,8 @@ SELECT src.subject_id                    AS subject_id,      -- to person
        lc.target_domain_id               AS target_domain_id,
        COALESCE(lc.target_concept_id, 0) AS target_concept_id,
        --
-    --    CAST(concat('proc.', src.unit_id) AS TEXT)      AS unit_id,
-    CAST('proc' AS TEXT) AS unit_id,
+       CAST(concat('proc.', src.unit_id) AS TEXT)      AS unit_id,
+
        src.load_table_id                 AS load_table_id,
        src.load_row_id                   AS load_row_id,
        src.trace_id                      AS trace_id

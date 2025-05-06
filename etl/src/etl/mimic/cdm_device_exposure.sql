@@ -25,9 +25,8 @@ CREATE TABLE cdm_device_exposure
 )
 ;
 
-
 INSERT INTO cdm_device_exposure
-SELECT row_number() OVER ()                     AS device_exposure_id,
+SELECT NEXTVAL('global_id_seq')                     AS device_exposure_id,
        per.person_id                    AS person_id,
        src.target_concept_id            AS device_concept_id,
        CAST(src.start_datetime AS DATE) AS device_exposure_start_date,
@@ -39,9 +38,7 @@ SELECT row_number() OVER ()                     AS device_exposure_id,
        CAST((
                CASE WHEN round(src.quantity) = src.quantity THEN src.quantity END)
            AS INTEGER)                  AS quantity,
-        --    CAST(
-        --        CASE WHEN round(src.quantity) = src.quantity THEN src.quantity END)
-        --    AS INTEGER)                  AS quantity,
+                  AS quantity,
        CAST(NULL AS INTEGER)            AS provider_id,
        vis.visit_occurrence_id          AS visit_occurrence_id,
        CAST(NULL AS INTEGER)            AS visit_detail_id,
@@ -65,7 +62,7 @@ WHERE src.target_domain_id = 'Device'
 
 
 INSERT INTO cdm_device_exposure
-SELECT row_number() OVER ()                     AS device_exposure_id,
+SELECT NEXTVAL('global_id_seq')  AS device_exposure_id,       
        per.person_id                    AS person_id,
        src.target_concept_id            AS device_concept_id,
        CAST(src.start_datetime AS DATE) AS device_exposure_start_date,
@@ -77,9 +74,7 @@ SELECT row_number() OVER ()                     AS device_exposure_id,
        CAST((
                CASE WHEN round(src.value_as_number) = src.value_as_number THEN src.value_as_number END)
            AS INTEGER)                  AS quantity,
-        --    CAST(
-        --        CASE WHEN round(src.value_as_number) = src.value_as_number THEN src.value_as_number END)
-        --    AS INTEGER)                  AS quantity,
+
        CAST(NULL AS INTEGER)            AS provider_id,
        vis.visit_occurrence_id          AS visit_occurrence_id,
        CAST(NULL AS INTEGER)            AS visit_detail_id,

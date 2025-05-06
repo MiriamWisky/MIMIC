@@ -31,7 +31,7 @@ CREATE TABLE cdm_procedure_occurrence
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_procedure_occurrence
-SELECT row_number() OVER ()                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')                      AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,
@@ -65,9 +65,8 @@ WHERE src.target_domain_id = 'Procedure'
 -- Rule 5
 -- lk_observation_mapped, possible DRG codes
 -- -------------------------------------------------------------------
-
 INSERT INTO cdm_procedure_occurrence
-SELECT row_number() OVER ()                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')  AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,
@@ -103,7 +102,7 @@ WHERE src.target_domain_id = 'Procedure'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_procedure_occurrence
-SELECT row_number() OVER ()                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')  AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,
@@ -141,7 +140,7 @@ WHERE src.target_domain_id = 'Procedure'
 -- -------------------------------------------------------------------
 
 INSERT INTO cdm_procedure_occurrence
-SELECT row_number() OVER ()                      AS procedure_occurrence_id,
+SELECT NEXTVAL('global_id_seq')  AS procedure_occurrence_id,
        per.person_id                     AS person_id,
        src.target_concept_id             AS procedure_concept_id,
        CAST(src.start_datetime AS DATE)  AS procedure_date,
